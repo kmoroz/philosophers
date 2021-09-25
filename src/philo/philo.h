@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 15:16:39 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/09/25 15:07:15 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/09/25 16:44:31 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,15 @@
 # include <pthread.h>
 
 /*
+** Далее структура «стол», которая состоит их массива вилок. В качестве вилки будет выступать мьютекс. Блокировка мьютекса означает «взять вилку», а разблокировка «положить её обратно».
+*/
+
+typedef struct s_table
+{
+	pthread_mutex_t	*fork;
+}				t_table;
+
+/*
 ** Объявим структуру «философ», которая будет хранить имя философа и номера вилок, которые он может взять.
 */
 
@@ -35,16 +44,8 @@ typedef struct s_philo
 	int			left_fork;
 	int			right_fork;
 	pthread_t	thread;
+	t_table		*table;
 }				t_philo;
-
-/*
-** Далее структура «стол», которая состоит их массива вилок. В качестве вилки будет выступать мьютекс. Блокировка мьютекса означает «взять вилку», а разблокировка «положить её обратно».
-*/
-
-typedef struct s_table
-{
-	pthread_mutex_t	*fork;
-}				t_table;
 
 typedef struct s_settings
 {
@@ -54,7 +55,6 @@ typedef struct s_settings
 	int		sleep_time;
 	int		meal_size;
 	t_philo	*philo;
-	t_table	*table;
 }				t_settings;
 
 #endif
