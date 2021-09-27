@@ -6,12 +6,13 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 14:23:20 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/09/25 16:51:43 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/09/27 13:58:13 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <pthread.h>
 #include <stdlib.h>
+#include <sys/time.h>
 #include "philo.h"
 
 int	ft_atoi(const char *str)
@@ -42,6 +43,26 @@ int	ft_atoi(const char *str)
 	return (strtonum);
 }
 
+unsigned long	get_current_time(void)
+{
+	struct timeval	tv;
+	unsigned long	result;
+
+	gettimeofday(&tv, NULL);
+	result = (tv.tv_sec) * 1000 + (tv.tv_usec / 1000);
+	return (result);
+}
+
+unsigned long	timer(unsigned long birth_time)
+{
+	struct timeval	tv;
+	unsigned long	result;
+
+	gettimeofday(&tv, NULL);
+	result = ((tv.tv_sec) * 1000 + (tv.tv_usec / 1000)) - birth_time;
+	return (result);
+}
+
 void	init_table(t_settings *settings, t_table *table)
 {
 	int	i;
@@ -69,12 +90,14 @@ void	init_philo(t_settings *settings)
 		settings->philo[i].left_fork = (i + 1) % settings->philo_size;
 		settings->philo[i].right_fork = i;
 		settings->philo[i].table = table;
+		settings->philo[i].birth_time = settings->start_time;
 		i++;
 	}
 }
 
 void	initialise(t_settings *settings, char **argv)
 {
+	settings->start_time = get_current_time();
 	settings->philo_size = ft_atoi(argv[PHILO_SIZE]);
 	settings->die_time = ft_atoi(argv[DIE_TIME]);
 	settings->eat_time = ft_atoi(argv[EAT_TIME]);
@@ -86,20 +109,26 @@ void	initialise(t_settings *settings, char **argv)
 	init_philo(settings);
 }
 
-void	*eat(void *arg)
+void	eat(t_philo *philo, t_table *table)
+{
+	if (pthread_mutex_lock(&table->fork[philo->right_fork]) != 0)
+		return ;
+	printf("%5lu Philosopher %d has taken a fork\n", timer(philo->birth_time), philo->philo_id);
+	pthread_mutex_lock(&table->fork[philo->left_fork]);
+	printf("%5lu Philosopher %d has taken a fork\n", timer(philo->birth_time), philo->philo_id);
+	printf("%5lu Philosopher %d is eating\n", timer(philo->birth_time), philo->philo_id);
+	pthread_mutex_unlock(&table->fork[philo->right_fork]);
+	pthread_mutex_unlock(&table->fork[philo->left_fork]);
+}
+
+void	*loop(void *arg)
 {
 	t_philo		*philo;
 	t_table		*table;
 
 	philo = (t_philo *)arg;
 	table = philo->table;
-	printf("Philosopher %d has taken a fork\n", philo->philo_id);
-	pthread_mutex_lock(&table->fork[philo->right_fork]);
-	pthread_mutex_lock(&table->fork[philo->left_fork]);
-	printf("Philosopher %d is eating\n", philo->philo_id);
-	pthread_mutex_unlock(&table->fork[philo->right_fork]);
-	pthread_mutex_unlock(&table->fork[philo->left_fork]);
-	printf("Philosopher %d has finished eating\n", philo->philo_id);
+	eat(philo, table);
 }
 
 int	main(int argc, char **argv)
@@ -111,7 +140,7 @@ int	main(int argc, char **argv)
 		initialise(&settings, argv);
 		for (int i = 0; i < settings.philo_size; i++)
 		{
-			pthread_create(&settings.philo[i].thread, NULL, eat, &settings.philo[i]);
+			pthread_create(&settings.philo[i].thread, NULL, loop, &settings.philo[i]);
 		}
 		for (int i = 0; i < settings.philo_size; i++)
 		{

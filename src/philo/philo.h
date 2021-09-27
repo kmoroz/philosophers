@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 15:16:39 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/09/25 16:44:31 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/09/27 14:09:00 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,21 +40,23 @@ typedef struct s_table
 
 typedef struct s_philo
 {
-	int			philo_id;
-	int			left_fork;
-	int			right_fork;
-	pthread_t	thread;
-	t_table		*table;
+	int				philo_id;
+	int				left_fork;
+	int				right_fork;
+	unsigned long	birth_time;
+	pthread_t		thread;
+	t_table			*table;
 }				t_philo;
 
 typedef struct s_settings
 {
-	int		philo_size;
-	int		die_time;
-	int		eat_time;
-	int		sleep_time;
-	int		meal_size;
-	t_philo	*philo;
+	int				philo_size;
+	int				die_time;
+	int				eat_time;
+	int				sleep_time;
+	int				meal_size;
+	unsigned long	start_time;
+	t_philo			*philo;
 }				t_settings;
 
 #endif
