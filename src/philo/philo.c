@@ -6,13 +6,14 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 14:23:20 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/09/27 13:58:13 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/09/27 16:38:22 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <pthread.h>
 #include <stdlib.h>
 #include <sys/time.h>
+#include <stdio.h>
 #include "philo.h"
 
 int	ft_atoi(const char *str)
@@ -109,16 +110,39 @@ void	initialise(t_settings *settings, char **argv)
 	init_philo(settings);
 }
 
+void	printer(t_philo philo, char *str, char *emoji)
+{
+	printf("%5lu Philosopher     %-5d %-20s %s\n",
+		timer(philo.birth_time), philo.philo_id, str, emoji);
+}
+
 void	eat(t_philo *philo, t_table *table)
 {
-	if (pthread_mutex_lock(&table->fork[philo->right_fork]) != 0)
-		return ;
-	printf("%5lu Philosopher %d has taken a fork\n", timer(philo->birth_time), philo->philo_id);
-	pthread_mutex_lock(&table->fork[philo->left_fork]);
-	printf("%5lu Philosopher %d has taken a fork\n", timer(philo->birth_time), philo->philo_id);
-	printf("%5lu Philosopher %d is eating\n", timer(philo->birth_time), philo->philo_id);
-	pthread_mutex_unlock(&table->fork[philo->right_fork]);
-	pthread_mutex_unlock(&table->fork[philo->left_fork]);
+	if (philo->philo_id % 2 == 0)
+	{
+		if (pthread_mutex_lock(&table->fork[philo->right_fork]) == LOCKED)
+			printer(*philo, "has taken a fork", "🍽️");
+		if (pthread_mutex_lock(&table->fork[philo->left_fork]) == LOCKED)
+			printer(*philo, "has taken a fork", "🍽️");
+	}
+	else
+	{
+		if (pthread_mutex_lock(&table->fork[philo->left_fork]) == LOCKED)
+			printer(*philo, "has taken a fork", "🍽️");
+		if (pthread_mutex_lock(&table->fork[philo->right_fork]) == LOCKED)
+			printer(*philo, "has taken a fork", "🍽️");
+	}
+	printer(*philo, "is eating", "🍝");
+	if (philo->philo_id % 2 == 0)
+	{
+		pthread_mutex_unlock(&table->fork[philo->right_fork]);
+		pthread_mutex_unlock(&table->fork[philo->left_fork]);
+	}
+	else
+	{
+		pthread_mutex_unlock(&table->fork[philo->left_fork]);
+		pthread_mutex_unlock(&table->fork[philo->right_fork]);
+	}
 }
 
 void	*loop(void *arg)
@@ -146,6 +170,5 @@ int	main(int argc, char **argv)
 		{
 			pthread_join(settings.philo[i].thread, NULL);
 		}
-		usleep(10000);
 	}
 }
