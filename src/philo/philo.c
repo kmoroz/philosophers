@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 14:23:20 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/09/27 16:38:22 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/09/28 14:10:29 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,8 @@ void	init_philo(t_settings *settings)
 		settings->philo[i].left_fork = (i + 1) % settings->philo_size;
 		settings->philo[i].right_fork = i;
 		settings->philo[i].table = table;
+		settings->philo[i].sleep_time = settings->sleep_time;
+		settings->philo[i].eat_time = settings->eat_time;
 		settings->philo[i].birth_time = settings->start_time;
 		i++;
 	}
@@ -112,11 +114,11 @@ void	initialise(t_settings *settings, char **argv)
 
 void	printer(t_philo philo, char *str, char *emoji)
 {
-	printf("%5lu Philosopher     %-5d %-20s %s\n",
+	printf("%-5lu Philosopher %-5d %-20s %s\n",
 		timer(philo.birth_time), philo.philo_id, str, emoji);
 }
 
-void	eat(t_philo *philo, t_table *table)
+void	grab_fork(t_philo *philo, t_table *table)
 {
 	if (philo->philo_id % 2 == 0)
 	{
@@ -131,18 +133,44 @@ void	eat(t_philo *philo, t_table *table)
 			printer(*philo, "has taken a fork", "🍽️");
 		if (pthread_mutex_lock(&table->fork[philo->right_fork]) == LOCKED)
 			printer(*philo, "has taken a fork", "🍽️");
+	}	
+}
+
+void	spend_time(unsigned long current_time, unsigned long time)
+{
+	unsigned long	finish_time;
+
+	finish_time = current_time + time;
+	while (current_time < finish_time)
+	{
+		current_time = get_current_time();
 	}
+}
+
+void	eat(t_philo *philo, t_table *table)
+{
+	unsigned long	current_time;
+
+	grab_fork(philo, table);
 	printer(*philo, "is eating", "🍝");
-	if (philo->philo_id % 2 == 0)
-	{
-		pthread_mutex_unlock(&table->fork[philo->right_fork]);
-		pthread_mutex_unlock(&table->fork[philo->left_fork]);
-	}
-	else
-	{
-		pthread_mutex_unlock(&table->fork[philo->left_fork]);
-		pthread_mutex_unlock(&table->fork[philo->right_fork]);
-	}
+	current_time = get_current_time();
+	spend_time(current_time, philo->eat_time);
+	pthread_mutex_unlock(&table->fork[philo->left_fork]);
+	pthread_mutex_unlock(&table->fork[philo->right_fork]);
+}
+
+void	sleep(t_philo *philo, int sleep_time)
+{
+	unsigned long	current_time;
+
+	printer(*philo, "is sleeping", "💤");
+	current_time = get_current_time();
+	spend_time(current_time, sleep_time);
+}
+
+void	think(t_philo *philo)
+{
+	printer(*philo, "is thinking", "💭");
 }
 
 void	*loop(void *arg)
@@ -153,6 +181,8 @@ void	*loop(void *arg)
 	philo = (t_philo *)arg;
 	table = philo->table;
 	eat(philo, table);
+	sleep(philo, philo->sleep_time);
+	think(philo);
 }
 
 int	main(int argc, char **argv)
