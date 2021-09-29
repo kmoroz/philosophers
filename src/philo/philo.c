@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 14:23:20 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/09/28 14:10:29 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/09/29 17:12:29 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,10 +88,13 @@ void	init_philo(t_settings *settings)
 	while (i < settings->philo_size)
 	{
 		settings->philo[i].philo_id = i;
+		settings->philo[i].state = ALIVE;
 		settings->philo[i].left_fork = (i + 1) % settings->philo_size;
 		settings->philo[i].right_fork = i;
 		settings->philo[i].table = table;
+		settings->philo[i].recent_meal = 0;
 		settings->philo[i].sleep_time = settings->sleep_time;
+		settings->philo[i].die_time = settings->die_time;
 		settings->philo[i].eat_time = settings->eat_time;
 		settings->philo[i].birth_time = settings->start_time;
 		i++;
@@ -112,10 +115,44 @@ void	initialise(t_settings *settings, char **argv)
 	init_philo(settings);
 }
 
+int	dead_or_alive(t_philo *philo)
+{
+	unsigned long	current_time;
+
+	current_time = timer(philo->birth_time);
+	if (current_time >= philo->recent_meal + philo->die_time)
+	{
+		philo->state = DEAD;
+		return (DEAD);
+	}
+	return (ALIVE);
+}
+
 void	printer(t_philo philo, char *str, char *emoji)
 {
 	printf("%-5lu Philosopher %-5d %-20s %s\n",
 		timer(philo.birth_time), philo.philo_id, str, emoji);
+}
+
+void	*check_state(void *arg)
+{
+	t_settings	*settings;
+	int			i;
+
+	settings = (t_settings *)arg;
+	i = 0;
+	while ("The prophecy is true")
+	{
+		if (settings->philo_size == i)
+			i = 0;
+		if (dead_or_alive(&settings->philo[i]) == DEAD)
+		{
+			printer(settings->philo[i], "died", "⚰️");
+			// printf("Philo %d %ld\n", settings->philo[i].philo_id, settings->philo->recent_meal);
+			break ;
+		}
+		i++;
+	}
 }
 
 void	grab_fork(t_philo *philo, t_table *table)
@@ -149,12 +186,14 @@ void	spend_time(unsigned long current_time, unsigned long time)
 
 void	eat(t_philo *philo, t_table *table)
 {
-	unsigned long	current_time;
-
 	grab_fork(philo, table);
-	printer(*philo, "is eating", "🍝");
-	current_time = get_current_time();
-	spend_time(current_time, philo->eat_time);
+	philo->recent_meal = get_current_time();
+	// printf("Philo %d %ld\n", philo->philo_id, philo->recent_meal);
+	if (philo->state == ALIVE)
+	{
+		printer(*philo, "is eating", "🍝");
+		spend_time(get_current_time(), philo->eat_time);
+	}
 	pthread_mutex_unlock(&table->fork[philo->left_fork]);
 	pthread_mutex_unlock(&table->fork[philo->right_fork]);
 }
@@ -180,9 +219,15 @@ void	*loop(void *arg)
 
 	philo = (t_philo *)arg;
 	table = philo->table;
-	eat(philo, table);
-	sleep(philo, philo->sleep_time);
-	think(philo);
+	while (philo->state == ALIVE)
+	{
+		// printf("Philo %d %ld\n", philo->philo_id, philo->recent_meal);
+		// printf("Philo %d %ld\n", philo->philo_id, philo->die_time);
+		eat(philo, table);
+		sleep(philo, philo->sleep_time);
+		think(philo);
+	}
+	exit(0);
 }
 
 int	main(int argc, char **argv)
@@ -196,9 +241,11 @@ int	main(int argc, char **argv)
 		{
 			pthread_create(&settings.philo[i].thread, NULL, loop, &settings.philo[i]);
 		}
+		pthread_create(&settings.checker, NULL, check_state, &settings);
 		for (int i = 0; i < settings.philo_size; i++)
 		{
 			pthread_join(settings.philo[i].thread, NULL);
 		}
+		pthread_join(settings.checker, NULL);
 	}
 }
