@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 14:23:20 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/01 13:54:35 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/01 15:45:52 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,8 +153,6 @@ void	*check_state(void *arg)
 		if (dead_or_alive(&settings->philo[i]) == DEAD)
 		{
 			printer(settings->philo[i], "died", "⚰️");
-			//printf("Philo %d %ld\n", settings->philo[i].philo_id, settings->philo->recent_meal);
-			//printf("Philo %d left fork %d right fork %d\n", settings->philo[i].philo_id, settings->philo[i].left_fork, settings->philo[i].right_fork);
 			exit(0);
 		}
 		i++;
@@ -189,7 +187,6 @@ void	eat(t_philo *philo, t_table *table)
 {
 	grab_fork(philo, table);
 	philo->recent_meal = get_current_time();
-	// printf("Philo %d %ld\n", philo->philo_id, philo->recent_meal);
 	if (philo->state == ALIVE)
 	{
 		printer(*philo, "is eating", "🍝");
@@ -221,8 +218,6 @@ void	*loop(void *arg)
 	table = philo->table;
 	while (philo->state == ALIVE)
 	{
-		// printf("Philo %d %ld\n", philo->philo_id, philo->recent_meal);
-		// printf("Philo %d %ld\n", philo->philo_id, philo->die_time);
 		eat(philo, table);
 		go_to_bed(philo, philo->sleep_time);
 		think(philo);
@@ -238,26 +233,16 @@ int	main(int argc, char **argv)
 	if (argc == 5 || argc == 6)
 	{
 		initialise(&settings, argv);
-		// while (i < settings.philo_size)
-		// {
-		// 	pthread_create(&settings.philo[i].thread, NULL, loop, &settings.philo[i]);
-		// 	//spend_time(get_current_time(), 2);
-		// 	i += 2;
-		// }
-		// i = 1;
-		// while (i < settings.philo_size)
-		// {
-		// 	pthread_create(&settings.philo[i].thread, NULL, loop, &settings.philo[i]);
-		// 	i += 2;
-		// }
-		for (int i = 0; i < settings.philo_size; i++)
+		while (i < settings.philo_size)
 		{
 			pthread_create(&settings.philo[i].thread, NULL, loop, &settings.philo[i]);
 			spend_time(get_current_time(), 2);
+			i++;
 		}
 		pthread_create(&settings.checker, NULL, check_state, &settings);
-		for (int i = 0; i < settings.philo_size; i++)
+		while (i)
 		{
+			i--;
 			pthread_join(settings.philo[i].thread, NULL);
 		}
 		pthread_join(settings.checker, NULL);
