@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 14:23:20 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/09/29 17:12:29 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/01 13:12:03 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <stdio.h>
+#include <unistd.h>
 #include "philo.h"
 
 int	ft_atoi(const char *str)
@@ -50,7 +51,7 @@ unsigned long	get_current_time(void)
 	unsigned long	result;
 
 	gettimeofday(&tv, NULL);
-	result = (tv.tv_sec) * 1000 + (tv.tv_usec / 1000);
+	result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
 	return (result);
 }
 
@@ -60,7 +61,7 @@ unsigned long	timer(unsigned long birth_time)
 	unsigned long	result;
 
 	gettimeofday(&tv, NULL);
-	result = ((tv.tv_sec) * 1000 + (tv.tv_usec / 1000)) - birth_time;
+	result = ((tv.tv_sec * 1000) + (tv.tv_usec / 1000)) - birth_time;
 	return (result);
 }
 
@@ -119,7 +120,10 @@ int	dead_or_alive(t_philo *philo)
 {
 	unsigned long	current_time;
 
-	current_time = timer(philo->birth_time);
+	if (!philo->recent_meal)
+		current_time = timer(philo->birth_time);
+	else
+		current_time = get_current_time();
 	if (current_time >= philo->recent_meal + philo->die_time)
 	{
 		philo->state = DEAD;
@@ -130,8 +134,9 @@ int	dead_or_alive(t_philo *philo)
 
 void	printer(t_philo philo, char *str, char *emoji)
 {
-	printf("%-5lu Philosopher %-5d %-20s %s\n",
-		timer(philo.birth_time), philo.philo_id, str, emoji);
+	if (philo.state == ALIVE || str == "died")
+		printf("%-5lu Philosopher %-5d %-20s %s\n",
+			timer(philo.birth_time), philo.philo_id, str, emoji);
 }
 
 void	*check_state(void *arg)
@@ -148,8 +153,9 @@ void	*check_state(void *arg)
 		if (dead_or_alive(&settings->philo[i]) == DEAD)
 		{
 			printer(settings->philo[i], "died", "⚰️");
-			// printf("Philo %d %ld\n", settings->philo[i].philo_id, settings->philo->recent_meal);
-			break ;
+			//printf("Philo %d %ld\n", settings->philo[i].philo_id, settings->philo->recent_meal);
+			//printf("Philo %d left fork %d right fork %d\n", settings->philo[i].philo_id, settings->philo[i].left_fork, settings->philo[i].right_fork);
+			exit(0);
 		}
 		i++;
 	}
@@ -175,13 +181,8 @@ void	grab_fork(t_philo *philo, t_table *table)
 
 void	spend_time(unsigned long current_time, unsigned long time)
 {
-	unsigned long	finish_time;
-
-	finish_time = current_time + time;
-	while (current_time < finish_time)
-	{
-		current_time = get_current_time();
-	}
+    while ((get_current_time() - current_time) < time)
+        usleep(100);
 }
 
 void	eat(t_philo *philo, t_table *table)
@@ -198,13 +199,12 @@ void	eat(t_philo *philo, t_table *table)
 	pthread_mutex_unlock(&table->fork[philo->right_fork]);
 }
 
-void	sleep(t_philo *philo, int sleep_time)
+void	go_to_bed(t_philo *philo, int sleep_time)
 {
 	unsigned long	current_time;
 
 	printer(*philo, "is sleeping", "💤");
-	current_time = get_current_time();
-	spend_time(current_time, sleep_time);
+	spend_time(get_current_time(), sleep_time);
 }
 
 void	think(t_philo *philo)
@@ -224,23 +224,36 @@ void	*loop(void *arg)
 		// printf("Philo %d %ld\n", philo->philo_id, philo->recent_meal);
 		// printf("Philo %d %ld\n", philo->philo_id, philo->die_time);
 		eat(philo, table);
-		sleep(philo, philo->sleep_time);
+		go_to_bed(philo, philo->sleep_time);
 		think(philo);
 	}
-	exit(0);
 }
 
 int	main(int argc, char **argv)
 {
 	t_settings	settings;
+	int			i;
 
+	i = 0;
 	if (argc == 5 || argc == 6)
 	{
 		initialise(&settings, argv);
-		for (int i = 0; i < settings.philo_size; i++)
+		while (i < settings.philo_size)
 		{
 			pthread_create(&settings.philo[i].thread, NULL, loop, &settings.philo[i]);
+			//spend_time(get_current_time(), 2);
+			i += 2;
 		}
+		i = 1;
+		while (i < settings.philo_size)
+		{
+			pthread_create(&settings.philo[i].thread, NULL, loop, &settings.philo[i]);
+			i += 2;
+		}
+		// for (int i = 0; i < settings.philo_size; i++)
+		// {
+		// 	pthread_create(&settings.philo[i].thread, NULL, loop, &settings.philo[i]);
+		// }
 		pthread_create(&settings.checker, NULL, check_state, &settings);
 		for (int i = 0; i < settings.philo_size; i++)
 		{
