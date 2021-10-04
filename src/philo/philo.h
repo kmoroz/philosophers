@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 15:16:39 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/09/29 14:21:37 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/04 17:10:37 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ typedef struct s_philo
 	unsigned long	eat_time;
 	unsigned long	die_time;
 	unsigned long	recent_meal;
+	int				meal_size;
 	pthread_t		thread;
 	t_table			*table;
 }				t_philo;

@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 14:23:20 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/04 13:59:11 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/04 17:17:01 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,7 @@ void	init_philo(t_settings *settings)
 		settings->philo[i].die_time = settings->die_time;
 		settings->philo[i].eat_time = settings->eat_time;
 		settings->philo[i].birth_time = settings->start_time;
+		settings->philo[i].meal_size = settings->meal_size;
 		i++;
 	}
 }
@@ -109,7 +110,7 @@ void	initialise(t_settings *settings, char **argv)
 	settings->die_time = ft_atoi(argv[DIE_TIME]);
 	settings->eat_time = ft_atoi(argv[EAT_TIME]);
 	settings->sleep_time = ft_atoi(argv[SLEEP_TIME]);
-	settings->meal_size = 0;
+	settings->meal_size = -1;
 	if (argv[MEAL_SIZE])
 		settings->meal_size = ft_atoi(argv[MEAL_SIZE]);
 	settings->philo = malloc(sizeof(t_philo) * settings->philo_size);
@@ -162,6 +163,8 @@ void	*check_state(void *arg)
 	{
 		if (settings->philo_size == i)
 			i = 0;
+		if (!settings->philo[i].meal_size)
+			return (NULL);
 		if (dead_or_alive(&settings->philo[i]) == DEAD)
 		{
 			mark_everyone_dead(settings);
@@ -203,6 +206,7 @@ void	eat(t_philo *philo, t_table *table)
 	if (philo->state == ALIVE)
 	{
 		printer(*philo, "is eating", "🍝");
+		philo->meal_size--;
 		spend_time(get_current_time(), philo->eat_time);
 	}
 	pthread_mutex_unlock(&table->fork[philo->left_fork]);
@@ -232,6 +236,8 @@ void	*loop(void *arg)
 	while (philo->state == ALIVE)
 	{
 		eat(philo, table);
+		if (!philo->meal_size)
+			return (NULL);
 		go_to_bed(philo, philo->sleep_time);
 		think(philo);
 	}
