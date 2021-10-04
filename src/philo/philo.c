@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 14:23:20 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/04 17:17:01 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/04 18:11:28 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,164 +16,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "philo.h"
-
-int	ft_atoi(const char *str)
-{
-	int	count;
-	int	strtonum;
-	int	isnegativenum;
-
-	count = 0;
-	strtonum = 0;
-	isnegativenum = 1;
-	while (str[count] == ' ' || str[count] == '\n' || str[count] == '\f'
-		|| str[count] == '\r' || str[count] == '\t' || str[count] == '\v')
-		count++;
-	if (str[count] == '-' || str[count] == '+')
-	{
-		if (str[count] == '-')
-			isnegativenum = -1;
-		count++;
-	}
-	while (str[count] >= '0' && str[count] <= '9')
-	{
-		strtonum = 10 * strtonum + (str[count] - '0');
-		count++;
-	}
-	if (isnegativenum == -1)
-		strtonum = strtonum * -1;
-	return (strtonum);
-}
-
-unsigned long	get_current_time(void)
-{
-	struct timeval	tv;
-	unsigned long	result;
-
-	gettimeofday(&tv, NULL);
-	result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-	return (result);
-}
-
-unsigned long	timer(unsigned long birth_time)
-{
-	struct timeval	tv;
-	unsigned long	result;
-
-	gettimeofday(&tv, NULL);
-	result = ((tv.tv_sec * 1000) + (tv.tv_usec / 1000)) - birth_time;
-	return (result);
-}
-
-void	init_table(t_settings *settings, t_table *table)
-{
-	int	i;
-
-	i = 0;
-	table->fork = malloc(sizeof(pthread_mutex_t) * settings->philo_size);
-	while (i < settings->philo_size)
-	{
-		pthread_mutex_init(&table->fork[i], NULL);
-		i++;
-	}
-}
-
-void	init_philo(t_settings *settings)
-{
-	int		i;
-	t_table	*table;
-
-	i = 0;
-	table = malloc(sizeof(t_table));
-	init_table(settings, table);
-	while (i < settings->philo_size)
-	{
-		settings->philo[i].philo_id = i + 1;
-		settings->philo[i].state = ALIVE;
-		settings->philo[i].left_fork = (i + 1) % settings->philo_size;
-		settings->philo[i].right_fork = i;
-		settings->philo[i].table = table;
-		settings->philo[i].recent_meal = 0;
-		settings->philo[i].sleep_time = settings->sleep_time;
-		settings->philo[i].die_time = settings->die_time;
-		settings->philo[i].eat_time = settings->eat_time;
-		settings->philo[i].birth_time = settings->start_time;
-		settings->philo[i].meal_size = settings->meal_size;
-		i++;
-	}
-}
-
-void	initialise(t_settings *settings, char **argv)
-{
-	settings->start_time = get_current_time();
-	settings->philo_size = ft_atoi(argv[PHILO_SIZE]);
-	settings->die_time = ft_atoi(argv[DIE_TIME]);
-	settings->eat_time = ft_atoi(argv[EAT_TIME]);
-	settings->sleep_time = ft_atoi(argv[SLEEP_TIME]);
-	settings->meal_size = -1;
-	if (argv[MEAL_SIZE])
-		settings->meal_size = ft_atoi(argv[MEAL_SIZE]);
-	settings->philo = malloc(sizeof(t_philo) * settings->philo_size);
-	init_philo(settings);
-}
-
-int	dead_or_alive(t_philo *philo)
-{
-	unsigned long	current_time;
-
-	if (!philo->recent_meal)
-		current_time = timer(philo->birth_time);
-	else
-		current_time = get_current_time();
-	if (current_time >= philo->recent_meal + philo->die_time)
-	{
-		philo->state = DEAD;
-		return (DEAD);
-	}
-	return (ALIVE);
-}
-
-void	mark_everyone_dead(t_settings *settings)
-{
-	int	i;
-
-	i = 0;
-	while (i < settings->philo_size)
-	{
-		settings->philo[i].state = DEAD;
-		i++;
-	}
-}
-
-void	printer(t_philo philo, char *str, char *emoji)
-{
-	if (philo.state == ALIVE || str == "died")
-		printf("%-5lu Philosopher %-5d %-20s %s\n",
-			timer(philo.birth_time), philo.philo_id, str, emoji);
-}
-
-void	*check_state(void *arg)
-{
-	t_settings	*settings;
-	int			i;
-
-	settings = (t_settings *)arg;
-	i = 0;
-	while ("The prophecy is true")
-	{
-		if (settings->philo_size == i)
-			i = 0;
-		if (!settings->philo[i].meal_size)
-			return (NULL);
-		if (dead_or_alive(&settings->philo[i]) == DEAD)
-		{
-			mark_everyone_dead(settings);
-			printer(settings->philo[i], "died", "⚰️");
-			return (NULL);
-		}
-		i++;
-	}
-}
 
 void	grab_fork(t_philo *philo, t_table *table)
 {
@@ -191,12 +33,6 @@ void	grab_fork(t_philo *philo, t_table *table)
 		if (pthread_mutex_lock(&table->fork[philo->right_fork]) == LOCKED)
 			printer(*philo, "has taken a fork", "🍽️");
 	}	
-}
-
-void	spend_time(unsigned long current_time, unsigned long time)
-{
-    while ((get_current_time() - current_time) < time)
-        usleep(100);
 }
 
 void	eat(t_philo *philo, t_table *table)
@@ -221,11 +57,6 @@ void	go_to_bed(t_philo *philo, int sleep_time)
 	spend_time(get_current_time(), sleep_time);
 }
 
-void	think(t_philo *philo)
-{
-	printer(*philo, "is thinking", "💭");
-}
-
 void	*loop(void *arg)
 {
 	t_philo		*philo;
@@ -239,7 +70,7 @@ void	*loop(void *arg)
 		if (!philo->meal_size)
 			return (NULL);
 		go_to_bed(philo, philo->sleep_time);
-		think(philo);
+		printer(*philo, "is thinking", "💭");
 	}
 	return (NULL);
 }
@@ -260,7 +91,7 @@ int	main(int argc, char **argv)
 			spend_time(get_current_time(), 2);
 			i++;
 		}
-		pthread_create(&settings.checker, NULL, check_state, &settings);
+		pthread_create(&settings.checker, NULL, checker, &settings);
 		while (i)
 		{
 			i--;

@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 15:16:39 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/04 17:10:37 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/04 17:39:28 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,5 +70,13 @@ typedef struct s_settings
 	pthread_t		checker;
 	t_philo			*philo;
 }				t_settings;
+
+void			initialise(t_settings *settings, char **argv);
+unsigned long	timer(unsigned long birth_time);
+unsigned long	get_current_time(void);
+void			spend_time(unsigned long current_time, unsigned long time);
+int				ft_atoi(const char *str);
+void			printer(t_philo philo, char *str, char *emoji);
+void			*checker(void *arg);
 
 #endif
