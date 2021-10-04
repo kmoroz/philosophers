@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 14:23:20 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/01 15:45:52 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/04 13:59:11 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ void	init_philo(t_settings *settings)
 	init_table(settings, table);
 	while (i < settings->philo_size)
 	{
-		settings->philo[i].philo_id = i;
+		settings->philo[i].philo_id = i + 1;
 		settings->philo[i].state = ALIVE;
 		settings->philo[i].left_fork = (i + 1) % settings->philo_size;
 		settings->philo[i].right_fork = i;
@@ -132,6 +132,18 @@ int	dead_or_alive(t_philo *philo)
 	return (ALIVE);
 }
 
+void	mark_everyone_dead(t_settings *settings)
+{
+	int	i;
+
+	i = 0;
+	while (i < settings->philo_size)
+	{
+		settings->philo[i].state = DEAD;
+		i++;
+	}
+}
+
 void	printer(t_philo philo, char *str, char *emoji)
 {
 	if (philo.state == ALIVE || str == "died")
@@ -152,8 +164,9 @@ void	*check_state(void *arg)
 			i = 0;
 		if (dead_or_alive(&settings->philo[i]) == DEAD)
 		{
+			mark_everyone_dead(settings);
 			printer(settings->philo[i], "died", "⚰️");
-			exit(0);
+			return (NULL);
 		}
 		i++;
 	}
@@ -222,6 +235,7 @@ void	*loop(void *arg)
 		go_to_bed(philo, philo->sleep_time);
 		think(philo);
 	}
+	return (NULL);
 }
 
 int	main(int argc, char **argv)
@@ -235,7 +249,8 @@ int	main(int argc, char **argv)
 		initialise(&settings, argv);
 		while (i < settings.philo_size)
 		{
-			pthread_create(&settings.philo[i].thread, NULL, loop, &settings.philo[i]);
+			pthread_create(&settings.philo[i].thread,
+				NULL, loop, &settings.philo[i]);
 			spend_time(get_current_time(), 2);
 			i++;
 		}
