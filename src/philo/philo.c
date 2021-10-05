@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 14:23:20 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/04 18:11:28 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/05 13:45:12 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,6 @@ void	eat(t_philo *philo, t_table *table)
 
 void	go_to_bed(t_philo *philo, int sleep_time)
 {
-	unsigned long	current_time;
-
 	printer(*philo, "is sleeping", "💤");
 	spend_time(get_current_time(), sleep_time);
 }

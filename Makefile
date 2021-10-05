@@ -5,7 +5,7 @@ src/philo/checker.c
 HEADER = src/philo/philo.h
 OBJ = $(SRC:.c=.o)
 
-FLAGS = -g -pthread #-Wall -Werror -Wextra
+FLAGS = -g -pthread -Wall -Werror -Wextra
 
 all: $(PHILO)
 
