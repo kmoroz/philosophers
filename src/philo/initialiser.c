@@ -6,14 +6,14 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/04 17:21:01 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/04 17:31:33 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/05 14:02:51 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
 #include "philo.h"
 
-static void	init_table(t_settings *settings, t_table *table)
+static void	init_forks(t_settings *settings, t_table *table)
 {
 	int	i;
 
@@ -29,18 +29,17 @@ static void	init_table(t_settings *settings, t_table *table)
 static void	init_philo(t_settings *settings)
 {
 	int		i;
-	t_table	*table;
+	t_table	table;
 
 	i = 0;
-	table = malloc(sizeof(t_table));
-	init_table(settings, table);
+	init_forks(settings, &table);
 	while (i < settings->philo_size)
 	{
 		settings->philo[i].philo_id = i + 1;
 		settings->philo[i].state = ALIVE;
 		settings->philo[i].left_fork = (i + 1) % settings->philo_size;
 		settings->philo[i].right_fork = i;
-		settings->philo[i].table = table;
+		settings->philo[i].table = &table;
 		settings->philo[i].recent_meal = 0;
 		settings->philo[i].sleep_time = settings->sleep_time;
 		settings->philo[i].die_time = settings->die_time;
