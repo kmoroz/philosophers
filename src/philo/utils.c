@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/04 17:26:39 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/04 18:09:03 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/06 15:33:47 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,4 +39,29 @@ int	ft_atoi(const char *str)
 	if (isnegativenum == -1)
 		strtonum = strtonum * -1;
 	return (strtonum);
+}
+
+static int	ft_strncmp(const void *ptr1, const void *ptr2, size_t num)
+{
+	size_t			count;
+	unsigned char	*buffer1;
+	unsigned char	*buffer2;
+
+	count = 0;
+	buffer1 = (unsigned char *)ptr1;
+	buffer2 = (unsigned char *)ptr2;
+	while (count != num && (buffer1[count] != '\0' || buffer2[count] != '\0'))
+	{
+		if (buffer1[count] != buffer2[count])
+			return (buffer1[count] - buffer2[count]);
+		count++;
+	}
+	return (0);
+}
+
+void	printer(t_philo philo, char *str, char *emoji)
+{
+	if (philo.state == ALIVE || !ft_strncmp(str, "died", 4))
+		printf("%-5lu Philosopher %-5d %-20s %s\n",
+			timer(philo.birth_time), philo.philo_id, str, emoji);
 }

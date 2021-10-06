@@ -6,18 +6,12 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/04 17:38:09 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/04 18:09:11 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/06 15:33:19 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-
-void	printer(t_philo philo, char *str, char *emoji)
-{
-	if (philo.state == ALIVE || str == "died")
-		printf("%-5lu Philosopher %-5d %-20s %s\n",
-			timer(philo.birth_time), philo.philo_id, str, emoji);
-}
+#include <stdio.h>
 
 static int	dead_or_alive(t_philo *philo)
 {
