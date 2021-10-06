@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 14:23:20 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/05 16:48:01 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/06 15:25:47 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,5 +106,6 @@ int	main(int argc, char **argv)
 			pthread_join(settings.philo[i].thread, NULL);
 		}
 		pthread_join(settings.checker, NULL);
+		free_everything(&settings);
 	}
 }
