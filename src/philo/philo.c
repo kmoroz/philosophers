@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 14:23:20 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/06 15:25:47 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/06 16:38:41 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,20 +92,23 @@ int	main(int argc, char **argv)
 	if (argc == 5 || argc == 6)
 	{
 		initialise(&settings, argv);
-		while (i < settings.philo_size)
+		if (settings.philo_size)
 		{
-			pthread_create(&settings.philo[i].thread,
-				NULL, loop, &settings.philo[i]);
-			spend_time(get_current_time(), 2);
-			i++;
+			while (i < settings.philo_size)
+			{
+				pthread_create(&settings.philo[i].thread,
+					NULL, loop, &settings.philo[i]);
+				spend_time(get_current_time(), 2);
+				i++;
+			}
+			pthread_create(&settings.checker, NULL, checker, &settings);
+			while (i)
+			{
+				i--;
+				pthread_join(settings.philo[i].thread, NULL);
+			}
+			pthread_join(settings.checker, NULL);
+			free_everything(&settings);
 		}
-		pthread_create(&settings.checker, NULL, checker, &settings);
-		while (i)
-		{
-			i--;
-			pthread_join(settings.philo[i].thread, NULL);
-		}
-		pthread_join(settings.checker, NULL);
-		free_everything(&settings);
 	}
 }
