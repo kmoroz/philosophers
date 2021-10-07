@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/04 17:21:01 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/06 16:02:41 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/07 17:47:36 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ static void	init_philo(t_settings *settings)
 	}
 }
 
-void	initialise(t_settings *settings, char **argv)
+int	initialise(t_settings *settings, char **argv)
 {
 	settings->philo_size = ft_atoi(argv[PHILO_SIZE]);
 	if (settings->philo_size)
@@ -64,5 +64,7 @@ void	initialise(t_settings *settings, char **argv)
 			settings->meal_size = ft_atoi(argv[MEAL_SIZE]);
 		settings->philo = malloc(sizeof(t_philo) * settings->philo_size);
 		init_philo(settings);
+		return (OK);
 	}
+	return (ERROR);
 }
