@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 15:16:39 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/06 15:26:14 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/07 17:47:44 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@
 */
 
 # define LOCKED 0
+# define ERROR -1
+# define OK 8
 
 /*
 ** Philo states
@@ -71,7 +73,7 @@ typedef struct s_settings
 	t_philo			*philo;
 }				t_settings;
 
-void			initialise(t_settings *settings, char **argv);
+int				initialise(t_settings *settings, char **argv);
 unsigned long	timer(unsigned long birth_time);
 unsigned long	get_current_time(void);
 void			spend_time(unsigned long current_time, unsigned long time);
