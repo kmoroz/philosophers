@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:41:31 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/18 12:35:48 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/18 14:16:11 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@
 typedef struct s_philo
 {
 	int				philo_id;
+	int				pid;
 	int				state;
 	unsigned long	birth_time;
 	unsigned long	sleep_time;
@@ -56,7 +57,6 @@ typedef struct s_philo
 	unsigned long	die_time;
 	unsigned long	recent_meal;
 	int				meal_size;
-	pthread_t		thread;
 	sem_t			forks;
 }				t_philo;
 
@@ -68,6 +68,8 @@ typedef struct s_settings
 	unsigned long	sleep_time;
 	int				meal_size;
 	unsigned long	start_time;
+	pthread_t		checker;
+	pthread_t		killer;
 	t_philo			*philo;
 	sem_t			forks;
 }				t_settings;

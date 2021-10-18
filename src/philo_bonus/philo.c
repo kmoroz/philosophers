@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/18 12:51:28 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/18 17:17:01 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <signal.h>
 
 int	ft_atoi(const char *str)
 {
@@ -84,6 +85,13 @@ unsigned long	timer(unsigned long birth_time)
 	return (result);
 }
 
+void	printer(t_philo philo, char *str, char *emoji)
+{
+	if (philo.state == ALIVE || !ft_strncmp(str, "died", 4))
+		printf("%-5lu Philosopher %-5d %-20s %s\n",
+			timer(philo.birth_time), philo.philo_id, str, emoji);
+}
+
 void	spend_time(unsigned long current_time, unsigned long time)
 {
 	while ((get_current_time() - current_time) < time)
@@ -102,6 +110,70 @@ void	spend_time(unsigned long current_time, unsigned long time)
 // 		i++;
 // 	}
 // }
+
+static int	dead_or_alive(t_philo *philo)
+{
+	unsigned long	current_time;
+
+	if (!philo->recent_meal)
+		current_time = timer(philo->birth_time);
+	else
+		current_time = get_current_time();
+	if (current_time >= philo->recent_meal + philo->die_time)
+	{
+		philo->state = DEAD;
+		return (DEAD);
+	}
+	return (ALIVE);
+}
+
+static void	mark_everyone_dead(t_settings *settings)
+{
+	int	i;
+
+	i = 0;
+	while (i < settings->philo_size)
+	{
+		settings->philo[i].state = DEAD;
+		i++;
+	}
+}
+
+void	kill_all(t_settings *settings)
+{
+	int	i;
+
+	i = 0;
+	while (i < settings->philo_size)
+	{
+		kill(settings->philo[i].pid, SIGKILL);
+		i++;
+	}
+}
+
+void	*checker(void *arg)
+{
+	t_settings	*settings;
+	int			i;
+
+	settings = (t_settings *)arg;
+	i = 0;
+	while ("The prophecy is true")
+	{
+		if (settings->philo_size == i)
+			i = 0;
+		if (!settings->philo[i].meal_size)
+			return (NULL);
+		if (dead_or_alive(&settings->philo[i]) == DEAD)
+		{
+			mark_everyone_dead(settings);
+			printer(settings->philo[i], "died", "⚰️");
+			kill_all(settings);
+			exit(0);
+		}
+		i++;
+	}
+}
 
 static void	init_philo(t_settings *settings)
 {
@@ -146,13 +218,6 @@ int	initialise(t_settings *settings, char **argv)
 	return (ERROR);
 }
 
-void	printer(t_philo philo, char *str, char *emoji)
-{
-	if (philo.state == ALIVE || !ft_strncmp(str, "died", 4))
-		printf("%-5lu Philosopher %-5d %-20s %s\n",
-			timer(philo.birth_time), philo.philo_id, str, emoji);
-}
-
 void	eat(t_philo *philo)
 {
 	sem_wait(&philo->forks);
@@ -176,18 +241,38 @@ void	go_to_bed(t_philo *philo, int sleep_time)
 void*	loop(void *arg)
 {
 	t_philo	*philo;
+	int		i;
 
 	philo = (t_philo *)arg;
-	eat(philo);
-	go_to_bed(philo, philo->sleep_time);
-	printer(*philo, "is thinking", "💭");
+	i = 0;
+	while (i < 4)
+	{
+		eat(philo);
+		go_to_bed(philo, philo->sleep_time);
+		printer(*philo, "is thinking", "💭");
+		i++;
+	}
+	return (NULL);
+}
+
+void	*killer(void *arg)
+{
+	t_settings	*settings;
+	int			i;
+
+	i = 0;
+	settings = (t_settings *)arg;
+	while (settings->philo->state == ALIVE)
+	{
+		kill(settings->philo[i].pid, SIGKILL);
+		i++;
+	}
 	return (NULL);
 }
 
 int	main(int argc, char **argv)
 {
 	t_settings	settings;
-	int			pid;
 	int			i;
 
 	i = 0;
@@ -196,11 +281,19 @@ int	main(int argc, char **argv)
 		initialise(&settings, argv);
 		while (i < settings.philo_size)
 		{
-			pid = fork();
-			if (pid == 0)
+			settings.philo[i].pid = fork();
+			if (settings.philo[i].pid == 0)
+			{
+				if (i == 0)
+					pthread_create(&settings.checker, NULL, checker, &settings);
 				loop(&settings.philo[i]);
+			}
 			spend_time(get_current_time(), 2);
 			i++;
 		}
+		//pthread_create(&settings.killer, NULL, killer, &settings);
+		//pthread_join(settings.killer, NULL);
+		//return (0);
+		pthread_join(settings.checker, NULL);
 	}
 }
