@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/18 17:17:01 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/19 16:25:35 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/wait.h>
 
 int	ft_atoi(const char *str)
 {
@@ -210,6 +211,7 @@ int	initialise(t_settings *settings, char **argv)
 		settings->meal_size = -1;
 		if (argv[MEAL_SIZE])
 			settings->meal_size = ft_atoi(argv[MEAL_SIZE]);
+		settings->checker = malloc(sizeof(pthread_t) * settings->philo_size);
 		settings->philo = malloc(sizeof(t_philo) * settings->philo_size);
 		sem_init(&settings->forks, 1, settings->philo_size);
 		init_philo(settings);
@@ -241,16 +243,13 @@ void	go_to_bed(t_philo *philo, int sleep_time)
 void*	loop(void *arg)
 {
 	t_philo	*philo;
-	int		i;
 
 	philo = (t_philo *)arg;
-	i = 0;
-	while (i < 4)
+	while (philo->state == ALIVE)
 	{
 		eat(philo);
 		go_to_bed(philo, philo->sleep_time);
 		printer(*philo, "is thinking", "💭");
-		i++;
 	}
 	return (NULL);
 }
@@ -262,7 +261,7 @@ void	*killer(void *arg)
 
 	i = 0;
 	settings = (t_settings *)arg;
-	while (settings->philo->state == ALIVE)
+	while (i < settings->philo_size)
 	{
 		kill(settings->philo[i].pid, SIGKILL);
 		i++;
@@ -282,18 +281,23 @@ int	main(int argc, char **argv)
 		while (i < settings.philo_size)
 		{
 			settings.philo[i].pid = fork();
+			spend_time(get_current_time(), 2);
 			if (settings.philo[i].pid == 0)
 			{
-				if (i == 0)
-					pthread_create(&settings.checker, NULL, checker, &settings);
+				pthread_create(&settings.checker[i], NULL, checker, &settings);
 				loop(&settings.philo[i]);
 			}
-			spend_time(get_current_time(), 2);
 			i++;
 		}
 		//pthread_create(&settings.killer, NULL, killer, &settings);
 		//pthread_join(settings.killer, NULL);
 		//return (0);
-		pthread_join(settings.checker, NULL);
+		//pthread_join(settings.checker, NULL);
+		i = 0;
+		while (i < settings.philo_size)
+		{
+			pthread_join(settings.checker[i], NULL);
+			i++;
+		}
 	}
 }

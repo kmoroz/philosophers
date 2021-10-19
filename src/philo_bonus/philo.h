@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:41:31 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/18 14:16:11 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/19 14:39:57 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ typedef struct s_settings
 	unsigned long	sleep_time;
 	int				meal_size;
 	unsigned long	start_time;
-	pthread_t		checker;
+	pthread_t		*checker;
 	pthread_t		killer;
 	t_philo			*philo;
 	sem_t			forks;
