@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/19 16:25:35 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/19 17:13:59 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -281,11 +281,11 @@ int	main(int argc, char **argv)
 		while (i < settings.philo_size)
 		{
 			settings.philo[i].pid = fork();
-			spend_time(get_current_time(), 2);
 			if (settings.philo[i].pid == 0)
 			{
 				pthread_create(&settings.checker[i], NULL, checker, &settings);
 				loop(&settings.philo[i]);
+				spend_time(get_current_time(), 2);
 			}
 			i++;
 		}
