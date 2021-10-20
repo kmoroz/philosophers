@@ -6,33 +6,38 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/04 17:21:01 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/07 17:47:36 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/20 11:08:52 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
 #include "philo.h"
 
-static void	init_forks(t_settings *settings, t_table *table)
+static int	init_forks(t_settings *settings, t_table *table)
 {
 	int	i;
 
 	i = 0;
 	table->fork = malloc(sizeof(pthread_mutex_t) * settings->philo_size);
+	if (!table->fork)
+		return (ERROR);
 	while (i < settings->philo_size)
 	{
-		pthread_mutex_init(&table->fork[i], NULL);
+		if (pthread_mutex_init(&table->fork[i], NULL) != 0)
+			return (ERROR);
 		i++;
 	}
+	return (OK);
 }
 
-static void	init_philo(t_settings *settings)
+static int	init_philo(t_settings *settings)
 {
 	int		i;
 	t_table	table;
 
 	i = 0;
-	init_forks(settings, &table);
+	if (init_forks(settings, &table) == ERROR)
+		return (ERROR);
 	while (i < settings->philo_size)
 	{
 		settings->philo[i].philo_id = i + 1;
@@ -48,6 +53,7 @@ static void	init_philo(t_settings *settings)
 		settings->philo[i].meal_size = settings->meal_size;
 		i++;
 	}
+	return (OK);
 }
 
 int	initialise(t_settings *settings, char **argv)
@@ -63,7 +69,8 @@ int	initialise(t_settings *settings, char **argv)
 		if (argv[MEAL_SIZE])
 			settings->meal_size = ft_atoi(argv[MEAL_SIZE]);
 		settings->philo = malloc(sizeof(t_philo) * settings->philo_size);
-		init_philo(settings);
+		if (!settings->philo || init_philo(settings) == ERROR)
+			return (ERROR);
 		return (OK);
 	}
 	return (ERROR);
