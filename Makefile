@@ -1,7 +1,8 @@
 PHILO = philo
 SRC = src/philo/philo.c src/philo/initialiser.c \
 src/philo/utils.c src/philo/time.c \
-src/philo/checker.c src/philo/freeing.c
+src/philo/checker.c src/philo/freeing.c \
+src/philo/routine.c
 HEADER = src/philo/philo.h
 OBJ = $(SRC:.c=.o)
 
