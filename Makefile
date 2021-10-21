@@ -17,12 +17,12 @@ $(PHILO): $(HEADER) $(OBJ)
 	@gcc $(FLAGS) $(OBJ) -o $(PHILO)
 	@echo "\n\033[92m $@ built 🍝\033[0m\n"
 
-%.o : %.c $(HEADER) $(HEADER_BONUS)
-	@gcc $(FLAGS) -c $< -o $@
-
 bonus: $(HEADER_BONUS) $(OBJ_BONUS)
 	@gcc $(FLAGS) $(OBJ_BONUS) -o $(PHILO_BONUS)
 	@echo "\n\033[92m $@ built 🍝\033[0m\n"
+
+%.o : %.c $(HEADER) $(HEADER_BONUS)
+	@gcc $(FLAGS) -c $< -o $@
 
 clean:
 	@rm -f $(OBJ) $(OBJ_BONUS)
@@ -32,4 +32,4 @@ fclean: clean
 	@rm -f $(PHILO) $(PHILO_BONUS)
 	@echo "\n\033[36m executables removed 👋\033[0m\n"
 
-re: fclean all
+re: fclean all bonus
