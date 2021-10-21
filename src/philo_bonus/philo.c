@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/19 17:13:59 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/21 16:05:22 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,19 +99,6 @@ void	spend_time(unsigned long current_time, unsigned long time)
 		usleep(100);
 }
 
-// static void	init_forks(t_settings *settings, t_table *table)
-// {
-// 	int	i;
-
-// 	i = 0;
-// 	table->fork = malloc(sizeof(pthread_mutex_t) * settings->philo_size);
-// 	while (i < settings->philo_size)
-// 	{
-// 		sem_init(&table->fork[i], 1, settings->philo_size);
-// 		i++;
-// 	}
-// }
-
 static int	dead_or_alive(t_philo *philo)
 {
 	unsigned long	current_time;
@@ -179,10 +166,8 @@ void	*checker(void *arg)
 static void	init_philo(t_settings *settings)
 {
 	int		i;
-	// t_table	table;
 
 	i = 0;
-	// init_forks(settings, &table);
 	while (i < settings->philo_size)
 	{
 		settings->philo[i].philo_id = i + 1;
@@ -193,7 +178,6 @@ static void	init_philo(t_settings *settings)
 		settings->philo[i].eat_time = settings->eat_time;
 		settings->philo[i].birth_time = settings->start_time;
 		settings->philo[i].meal_size = settings->meal_size;
-		// settings->philo[i].table = &table;
 		settings->philo[i].forks = settings->forks;
 		i++;
 	}
@@ -213,7 +197,7 @@ int	initialise(t_settings *settings, char **argv)
 			settings->meal_size = ft_atoi(argv[MEAL_SIZE]);
 		settings->checker = malloc(sizeof(pthread_t) * settings->philo_size);
 		settings->philo = malloc(sizeof(t_philo) * settings->philo_size);
-		sem_init(&settings->forks, 1, settings->philo_size);
+		settings->forks = sem_open("forks", O_CREAT, 0600, settings->philo_size);
 		init_philo(settings);
 		return (OK);
 	}
@@ -222,16 +206,16 @@ int	initialise(t_settings *settings, char **argv)
 
 void	eat(t_philo *philo)
 {
-	sem_wait(&philo->forks);
+	sem_wait(philo->forks);
 	printer(*philo, "has taken a fork", "🍽️");
-	sem_wait(&philo->forks);
+	sem_wait(philo->forks);
 	printer(*philo, "has taken a fork", "🍽️");
 	philo->recent_meal = get_current_time();
 	printer(*philo, "is eating", "🍝");
 	philo->meal_size--;
 	spend_time(get_current_time(), philo->eat_time);
-	sem_post(&philo->forks);
-	sem_post(&philo->forks);
+	sem_post(philo->forks);
+	sem_post(philo->forks);
 }
 
 void	go_to_bed(t_philo *philo, int sleep_time)
@@ -281,23 +265,30 @@ int	main(int argc, char **argv)
 		while (i < settings.philo_size)
 		{
 			settings.philo[i].pid = fork();
+			spend_time(get_current_time(), 2);
 			if (settings.philo[i].pid == 0)
 			{
 				pthread_create(&settings.checker[i], NULL, checker, &settings);
 				loop(&settings.philo[i]);
-				spend_time(get_current_time(), 2);
 			}
 			i++;
 		}
-		//pthread_create(&settings.killer, NULL, killer, &settings);
+		pthread_create(&settings.killer, NULL, killer, &settings);
 		//pthread_join(settings.killer, NULL);
 		//return (0);
-		//pthread_join(settings.checker, NULL);
+		// i = 0;
+		// while (i < settings.philo_size)
+		// {
+		// 	waitpid(settings.philo[i].pid, NULL, 0);
+		// 	i++;
+		// }
 		i = 0;
 		while (i < settings.philo_size)
 		{
 			pthread_join(settings.checker[i], NULL);
 			i++;
 		}
+		sem_close(settings.forks);
+		sem_unlink("forks");
 	}
 }
