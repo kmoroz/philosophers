@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/21 16:05:22 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/22 16:22:50 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,23 +48,23 @@ int	ft_atoi(const char *str)
 	return (strtonum);
 }
 
-static int	ft_strncmp(const void *ptr1, const void *ptr2, size_t num)
-{
-	size_t			count;
-	unsigned char	*buffer1;
-	unsigned char	*buffer2;
+// static int	ft_strncmp(const void *ptr1, const void *ptr2, size_t num)
+// {
+// 	size_t			count;
+// 	unsigned char	*buffer1;
+// 	unsigned char	*buffer2;
 
-	count = 0;
-	buffer1 = (unsigned char *)ptr1;
-	buffer2 = (unsigned char *)ptr2;
-	while (count != num && (buffer1[count] != '\0' || buffer2[count] != '\0'))
-	{
-		if (buffer1[count] != buffer2[count])
-			return (buffer1[count] - buffer2[count]);
-		count++;
-	}
-	return (0);
-}
+// 	count = 0;
+// 	buffer1 = (unsigned char *)ptr1;
+// 	buffer2 = (unsigned char *)ptr2;
+// 	while (count != num && (buffer1[count] != '\0' || buffer2[count] != '\0'))
+// 	{
+// 		if (buffer1[count] != buffer2[count])
+// 			return (buffer1[count] - buffer2[count]);
+// 		count++;
+// 	}
+// 	return (0);
+// }
 
 unsigned long	get_current_time(void)
 {
@@ -88,7 +88,7 @@ unsigned long	timer(unsigned long birth_time)
 
 void	printer(t_philo philo, char *str, char *emoji)
 {
-	if (philo.state == ALIVE || !ft_strncmp(str, "died", 4))
+	//if (!ft_strncmp(str, "died", 4))
 		printf("%-5lu Philosopher %-5d %-20s %s\n",
 			timer(philo.birth_time), philo.philo_id, str, emoji);
 }
@@ -108,35 +108,8 @@ static int	dead_or_alive(t_philo *philo)
 	else
 		current_time = get_current_time();
 	if (current_time >= philo->recent_meal + philo->die_time)
-	{
-		philo->state = DEAD;
 		return (DEAD);
-	}
 	return (ALIVE);
-}
-
-static void	mark_everyone_dead(t_settings *settings)
-{
-	int	i;
-
-	i = 0;
-	while (i < settings->philo_size)
-	{
-		settings->philo[i].state = DEAD;
-		i++;
-	}
-}
-
-void	kill_all(t_settings *settings)
-{
-	int	i;
-
-	i = 0;
-	while (i < settings->philo_size)
-	{
-		kill(settings->philo[i].pid, SIGKILL);
-		i++;
-	}
 }
 
 void	*checker(void *arg)
@@ -150,14 +123,13 @@ void	*checker(void *arg)
 	{
 		if (settings->philo_size == i)
 			i = 0;
-		if (!settings->philo[i].meal_size)
-			return (NULL);
+		//if (!settings->philo[i].meal_size)
+			//return (NULL);
 		if (dead_or_alive(&settings->philo[i]) == DEAD)
 		{
-			mark_everyone_dead(settings);
 			printer(settings->philo[i], "died", "⚰️");
-			kill_all(settings);
-			exit(0);
+			sem_post(settings->state);
+			return (NULL);
 		}
 		i++;
 	}
@@ -171,7 +143,7 @@ static void	init_philo(t_settings *settings)
 	while (i < settings->philo_size)
 	{
 		settings->philo[i].philo_id = i + 1;
-		settings->philo[i].state = ALIVE;
+		settings->philo[i].state = settings->state;
 		settings->philo[i].recent_meal = 0;
 		settings->philo[i].sleep_time = settings->sleep_time;
 		settings->philo[i].die_time = settings->die_time;
@@ -198,6 +170,7 @@ int	initialise(t_settings *settings, char **argv)
 		settings->checker = malloc(sizeof(pthread_t) * settings->philo_size);
 		settings->philo = malloc(sizeof(t_philo) * settings->philo_size);
 		settings->forks = sem_open("forks", O_CREAT, 0600, settings->philo_size);
+		settings->state = sem_open("state", O_CREAT, 0600, LOCKED);
 		init_philo(settings);
 		return (OK);
 	}
@@ -229,7 +202,7 @@ void*	loop(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	while (philo->state == ALIVE)
+	while ("The prophesy is true")
 	{
 		eat(philo);
 		go_to_bed(philo, philo->sleep_time);
@@ -245,6 +218,7 @@ void	*killer(void *arg)
 
 	i = 0;
 	settings = (t_settings *)arg;
+	sem_wait(settings->state);
 	while (i < settings->philo_size)
 	{
 		kill(settings->philo[i].pid, SIGKILL);
@@ -265,7 +239,7 @@ int	main(int argc, char **argv)
 		while (i < settings.philo_size)
 		{
 			settings.philo[i].pid = fork();
-			spend_time(get_current_time(), 2);
+			spend_time(get_current_time(), 1);
 			if (settings.philo[i].pid == 0)
 			{
 				pthread_create(&settings.checker[i], NULL, checker, &settings);
@@ -273,22 +247,30 @@ int	main(int argc, char **argv)
 			}
 			i++;
 		}
-		pthread_create(&settings.killer, NULL, killer, &settings);
-		//pthread_join(settings.killer, NULL);
-		//return (0);
-		// i = 0;
-		// while (i < settings.philo_size)
-		// {
-		// 	waitpid(settings.philo[i].pid, NULL, 0);
-		// 	i++;
-		// }
+		//pthread_create(&settings.killer, NULL, killer, &settings);
+		// pthread_join(settings.killer, NULL);
 		i = 0;
 		while (i < settings.philo_size)
 		{
 			pthread_join(settings.checker[i], NULL);
 			i++;
 		}
+		// i = 0;
+		// while (i < settings.philo_size)
+		// {
+		// 	waitpid(settings.philo[i].pid, NULL, 0);
+		// 	i++;
+		// }
+		sem_wait(settings.state);
+		i = 0;
+		while (i < settings.philo_size)
+		{
+			kill(settings.philo[i].pid, SIGKILL);
+			i++;
+		}
 		sem_close(settings.forks);
+		sem_close(settings.state);
 		sem_unlink("forks");
+		sem_unlink("state");
 	}
 }
