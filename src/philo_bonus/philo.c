@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/22 16:22:50 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/26 13:06:58 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,6 +127,7 @@ void	*checker(void *arg)
 			//return (NULL);
 		if (dead_or_alive(&settings->philo[i]) == DEAD)
 		{
+			sem_wait(settings->pronounce_dead);
 			printer(settings->philo[i], "died", "⚰️");
 			sem_post(settings->state);
 			return (NULL);
@@ -171,6 +172,7 @@ int	initialise(t_settings *settings, char **argv)
 		settings->philo = malloc(sizeof(t_philo) * settings->philo_size);
 		settings->forks = sem_open("forks", O_CREAT, 0600, settings->philo_size);
 		settings->state = sem_open("state", O_CREAT, 0600, LOCKED);
+		settings->pronounce_dead = sem_open("pronounce dead", O_CREAT, 0600, 1);
 		init_philo(settings);
 		return (OK);
 	}
@@ -247,20 +249,12 @@ int	main(int argc, char **argv)
 			}
 			i++;
 		}
-		//pthread_create(&settings.killer, NULL, killer, &settings);
-		// pthread_join(settings.killer, NULL);
 		i = 0;
 		while (i < settings.philo_size)
 		{
 			pthread_join(settings.checker[i], NULL);
 			i++;
 		}
-		// i = 0;
-		// while (i < settings.philo_size)
-		// {
-		// 	waitpid(settings.philo[i].pid, NULL, 0);
-		// 	i++;
-		// }
 		sem_wait(settings.state);
 		i = 0;
 		while (i < settings.philo_size)
@@ -270,7 +264,9 @@ int	main(int argc, char **argv)
 		}
 		sem_close(settings.forks);
 		sem_close(settings.state);
+		sem_close(settings.pronounce_dead);
 		sem_unlink("forks");
 		sem_unlink("state");
+		sem_unlink("pronounce dead");
 	}
 }
