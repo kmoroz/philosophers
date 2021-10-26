@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/26 13:06:58 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/26 15:30:10 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,9 +88,8 @@ unsigned long	timer(unsigned long birth_time)
 
 void	printer(t_philo philo, char *str, char *emoji)
 {
-	//if (!ft_strncmp(str, "died", 4))
-		printf("%-5lu Philosopher %-5d %-20s %s\n",
-			timer(philo.birth_time), philo.philo_id, str, emoji);
+	printf("%-5lu Philosopher %-5d %-20s %s\n",
+		timer(philo.birth_time), philo.philo_id, str, emoji);
 }
 
 void	spend_time(unsigned long current_time, unsigned long time)
@@ -114,26 +113,23 @@ static int	dead_or_alive(t_philo *philo)
 
 void	*checker(void *arg)
 {
-	t_settings	*settings;
-	int			i;
+	t_philo	*philo;
 
-	settings = (t_settings *)arg;
-	i = 0;
-	while ("The prophecy is true")
+	philo = (t_philo *)arg;
+	//if (!settings->philo[i].meal_size)
+		//return (NULL);
+	while (1)
 	{
-		if (settings->philo_size == i)
-			i = 0;
-		//if (!settings->philo[i].meal_size)
-			//return (NULL);
-		if (dead_or_alive(&settings->philo[i]) == DEAD)
+		if (dead_or_alive(philo) == DEAD)
 		{
-			sem_wait(settings->pronounce_dead);
-			printer(settings->philo[i], "died", "⚰️");
-			sem_post(settings->state);
+			sem_wait(philo->pronounce_dead);
+			printer(*philo, "died", "⚰️");
+			//printf("%ld\n", philo->recent_meal);
+			sem_post(philo->state);
 			return (NULL);
 		}
-		i++;
 	}
+	return (NULL);
 }
 
 static void	init_philo(t_settings *settings)
@@ -152,6 +148,8 @@ static void	init_philo(t_settings *settings)
 		settings->philo[i].birth_time = settings->start_time;
 		settings->philo[i].meal_size = settings->meal_size;
 		settings->philo[i].forks = settings->forks;
+		settings->philo[i].state = settings->state;
+		settings->philo[i].pronounce_dead = settings->pronounce_dead;
 		i++;
 	}
 }
@@ -170,6 +168,9 @@ int	initialise(t_settings *settings, char **argv)
 			settings->meal_size = ft_atoi(argv[MEAL_SIZE]);
 		settings->checker = malloc(sizeof(pthread_t) * settings->philo_size);
 		settings->philo = malloc(sizeof(t_philo) * settings->philo_size);
+		sem_unlink("forks");
+		sem_unlink("state");
+		sem_unlink("pronounce dead");
 		settings->forks = sem_open("forks", O_CREAT, 0600, settings->philo_size);
 		settings->state = sem_open("state", O_CREAT, 0600, LOCKED);
 		settings->pronounce_dead = sem_open("pronounce dead", O_CREAT, 0600, 1);
@@ -186,6 +187,7 @@ void	eat(t_philo *philo)
 	sem_wait(philo->forks);
 	printer(*philo, "has taken a fork", "🍽️");
 	philo->recent_meal = get_current_time();
+	//printf("%ld\n", philo->recent_meal);
 	printer(*philo, "is eating", "🍝");
 	philo->meal_size--;
 	spend_time(get_current_time(), philo->eat_time);
@@ -244,7 +246,7 @@ int	main(int argc, char **argv)
 			spend_time(get_current_time(), 1);
 			if (settings.philo[i].pid == 0)
 			{
-				pthread_create(&settings.checker[i], NULL, checker, &settings);
+				pthread_create(&settings.checker[i], NULL, checker, &settings.philo[i]);
 				loop(&settings.philo[i]);
 			}
 			i++;

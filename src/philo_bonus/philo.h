@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:41:31 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/26 12:54:33 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/26 13:45:03 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ typedef struct s_philo
 	int				meal_size;
 	sem_t			*forks;
 	sem_t			*state;
+	sem_t			*pronounce_dead;
 }				t_philo;
 
 typedef struct s_settings
