@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/26 15:30:10 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/27 16:38:07 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,24 +47,6 @@ int	ft_atoi(const char *str)
 		strtonum = strtonum * -1;
 	return (strtonum);
 }
-
-// static int	ft_strncmp(const void *ptr1, const void *ptr2, size_t num)
-// {
-// 	size_t			count;
-// 	unsigned char	*buffer1;
-// 	unsigned char	*buffer2;
-
-// 	count = 0;
-// 	buffer1 = (unsigned char *)ptr1;
-// 	buffer2 = (unsigned char *)ptr2;
-// 	while (count != num && (buffer1[count] != '\0' || buffer2[count] != '\0'))
-// 	{
-// 		if (buffer1[count] != buffer2[count])
-// 			return (buffer1[count] - buffer2[count]);
-// 		count++;
-// 	}
-// 	return (0);
-// }
 
 unsigned long	get_current_time(void)
 {
@@ -116,15 +98,18 @@ void	*checker(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	//if (!settings->philo[i].meal_size)
-		//return (NULL);
 	while (1)
 	{
+		if (!philo->meal_size)
+		{
+			printf("nom nom over\n");
+			sem_post(philo->state);
+			return (NULL);
+		}
 		if (dead_or_alive(philo) == DEAD)
 		{
 			sem_wait(philo->pronounce_dead);
 			printer(*philo, "died", "⚰️");
-			//printf("%ld\n", philo->recent_meal);
 			sem_post(philo->state);
 			return (NULL);
 		}
@@ -187,7 +172,6 @@ void	eat(t_philo *philo)
 	sem_wait(philo->forks);
 	printer(*philo, "has taken a fork", "🍽️");
 	philo->recent_meal = get_current_time();
-	//printf("%ld\n", philo->recent_meal);
 	printer(*philo, "is eating", "🍝");
 	philo->meal_size--;
 	spend_time(get_current_time(), philo->eat_time);
@@ -206,16 +190,18 @@ void*	loop(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	while ("The prophesy is true")
+	while (philo->meal_size)
 	{
 		eat(philo);
+		if (!philo->meal_size)
+			return (NULL);
 		go_to_bed(philo, philo->sleep_time);
 		printer(*philo, "is thinking", "💭");
 	}
 	return (NULL);
 }
 
-void	*killer(void *arg)
+void	kill_process(void *arg)
 {
 	t_settings	*settings;
 	int			i;
@@ -228,7 +214,6 @@ void	*killer(void *arg)
 		kill(settings->philo[i].pid, SIGKILL);
 		i++;
 	}
-	return (NULL);
 }
 
 int	main(int argc, char **argv)
@@ -257,13 +242,7 @@ int	main(int argc, char **argv)
 			pthread_join(settings.checker[i], NULL);
 			i++;
 		}
-		sem_wait(settings.state);
-		i = 0;
-		while (i < settings.philo_size)
-		{
-			kill(settings.philo[i].pid, SIGKILL);
-			i++;
-		}
+		kill_process(&settings);
 		sem_close(settings.forks);
 		sem_close(settings.state);
 		sem_close(settings.pronounce_dead);
