@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/28 13:38:51 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/28 14:42:14 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,6 @@ void	*checker(void *arg)
 	{
 		if (!philo->meal_size && philo->philo_id == philo->philo_size)
 		{
-			//printf("nom nom over\n");
 			sem_wait(philo->pronounce_dead);
 			sem_post(philo->state);
 			return (NULL);
@@ -188,11 +187,8 @@ void	go_to_bed(t_philo *philo, int sleep_time)
 	spend_time(get_current_time(), sleep_time);
 }
 
-void*	loop(void *arg)
+void*	loop(t_philo *philo)
 {
-	t_philo	*philo;
-
-	philo = (t_philo *)arg;
 	while (philo->meal_size)
 	{
 		eat(philo);
@@ -219,6 +215,41 @@ void	kill_process(void *arg)
 	}
 }
 
+void	close_semaphore(t_settings *settings)
+{
+	sem_close(settings->forks);
+	sem_close(settings->state);
+	sem_close(settings->pronounce_dead);
+	sem_unlink("forks");
+	sem_unlink("state");
+	sem_unlink("pronounce dead");
+}
+
+void	start_children(t_settings *settings)
+{
+	int	i;
+
+	i = 0;
+	while (i < settings->philo_size)
+	{
+		settings->philo[i].pid = fork();
+		spend_time(get_current_time(), 1);
+		if (settings->philo[i].pid == 0)
+		{
+			pthread_create(&settings->checker[i], NULL,
+				checker, &settings->philo[i]);
+			loop(&settings->philo[i]);
+		}
+		i++;
+	}
+}
+
+void free_everything(t_settings *settings)
+{
+	free(settings->checker);
+	free(settings->philo);
+}
+
 int	main(int argc, char **argv)
 {
 	t_settings	settings;
@@ -228,29 +259,14 @@ int	main(int argc, char **argv)
 	if (argc == 5 || argc == 6)
 	{
 		initialise(&settings, argv);
-		while (i < settings.philo_size)
+		start_children(&settings);
+		while (i)
 		{
-			settings.philo[i].pid = fork();
-			spend_time(get_current_time(), 1);
-			if (settings.philo[i].pid == 0)
-			{
-				pthread_create(&settings.checker[i], NULL, checker, &settings.philo[i]);
-				loop(&settings.philo[i]);
-			}
-			i++;
-		}
-		i = 0;
-		while (i < settings.philo_size)
-		{
+			i--;
 			pthread_join(settings.checker[i], NULL);
-			i++;
 		}
 		kill_process(&settings);
-		sem_close(settings.forks);
-		sem_close(settings.state);
-		sem_close(settings.pronounce_dead);
-		sem_unlink("forks");
-		sem_unlink("state");
-		sem_unlink("pronounce dead");
+		close_semaphore(&settings);
+		free_everything(&settings);
 	}
 }
