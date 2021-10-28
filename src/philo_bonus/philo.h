@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:41:31 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/26 13:45:03 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/28 13:34:24 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@
 typedef struct s_philo
 {
 	int				philo_id;
+	int				philo_size;
 	int				pid;
 	unsigned long	birth_time;
 	unsigned long	sleep_time;

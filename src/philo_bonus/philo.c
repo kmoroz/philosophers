@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/27 16:38:07 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/10/28 13:38:51 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,9 +100,10 @@ void	*checker(void *arg)
 	philo = (t_philo *)arg;
 	while (1)
 	{
-		if (!philo->meal_size)
+		if (!philo->meal_size && philo->philo_id == philo->philo_size)
 		{
-			printf("nom nom over\n");
+			//printf("nom nom over\n");
+			sem_wait(philo->pronounce_dead);
 			sem_post(philo->state);
 			return (NULL);
 		}
@@ -125,6 +126,7 @@ static void	init_philo(t_settings *settings)
 	while (i < settings->philo_size)
 	{
 		settings->philo[i].philo_id = i + 1;
+		settings->philo[i].philo_size = settings->philo_size;
 		settings->philo[i].state = settings->state;
 		settings->philo[i].recent_meal = 0;
 		settings->philo[i].sleep_time = settings->sleep_time;
@@ -173,7 +175,8 @@ void	eat(t_philo *philo)
 	printer(*philo, "has taken a fork", "🍽️");
 	philo->recent_meal = get_current_time();
 	printer(*philo, "is eating", "🍝");
-	philo->meal_size--;
+	if (philo->meal_size)
+		philo->meal_size--;
 	spend_time(get_current_time(), philo->eat_time);
 	sem_post(philo->forks);
 	sem_post(philo->forks);
