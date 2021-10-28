@@ -1,9 +1,9 @@
 PHILO = philo
-SRC = src/philo/philo.c src/philo/initialiser.c \
-src/philo/utils.c src/philo/time.c \
-src/philo/checker.c src/philo/freeing.c \
-src/philo/routine.c
-HEADER = src/philo/philo.h
+SRC = philo.c initialiser.c \
+utils.c time.c \
+checker.c freeing.c \
+routine.c
+HEADER = philo.h
 OBJ = $(SRC:.c=.o)
 
 FLAGS = -g -pthread -Wall -Werror -Wextra
