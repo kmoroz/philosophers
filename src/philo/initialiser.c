@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/04 17:21:01 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/20 11:08:52 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/03 09:31:44 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,10 +33,11 @@ static int	init_forks(t_settings *settings, t_table *table)
 static int	init_philo(t_settings *settings)
 {
 	int		i;
-	t_table	table;
+	t_table	*table;
 
 	i = 0;
-	if (init_forks(settings, &table) == ERROR)
+	table = malloc(sizeof(t_table));
+	if (init_forks(settings, table) == ERROR)
 		return (ERROR);
 	while (i < settings->philo_size)
 	{
@@ -44,7 +45,7 @@ static int	init_philo(t_settings *settings)
 		settings->philo[i].state = ALIVE;
 		settings->philo[i].left_fork = (i + 1) % settings->philo_size;
 		settings->philo[i].right_fork = i;
-		settings->philo[i].table = &table;
+		settings->philo[i].table = table;
 		settings->philo[i].recent_meal = 0;
 		settings->philo[i].sleep_time = settings->sleep_time;
 		settings->philo[i].die_time = settings->die_time;
