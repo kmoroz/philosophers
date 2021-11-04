@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/28 14:42:14 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/04 14:02:52 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ void	*checker(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	while (1)
+	while ("The prophecy is true")
 	{
 		if (!philo->meal_size && philo->philo_id == philo->philo_size)
 		{
@@ -189,11 +189,9 @@ void	go_to_bed(t_philo *philo, int sleep_time)
 
 void*	loop(t_philo *philo)
 {
-	while (philo->meal_size)
+	while ("The prophecy is true")
 	{
 		eat(philo);
-		if (!philo->meal_size)
-			return (NULL);
 		go_to_bed(philo, philo->sleep_time);
 		printer(*philo, "is thinking", "💭");
 	}
@@ -233,7 +231,8 @@ void	start_children(t_settings *settings)
 	while (i < settings->philo_size)
 	{
 		settings->philo[i].pid = fork();
-		spend_time(get_current_time(), 1);
+		if (i > 0)
+			spend_time(get_current_time(), 5);
 		if (settings->philo[i].pid == 0)
 		{
 			pthread_create(&settings->checker[i], NULL,
