@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/04 14:02:52 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/04 14:29:21 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,184 +19,6 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
-
-int	ft_atoi(const char *str)
-{
-	int	count;
-	int	strtonum;
-	int	isnegativenum;
-
-	count = 0;
-	strtonum = 0;
-	isnegativenum = 1;
-	while (str[count] == ' ' || str[count] == '\n' || str[count] == '\f'
-		|| str[count] == '\r' || str[count] == '\t' || str[count] == '\v')
-		count++;
-	if (str[count] == '-' || str[count] == '+')
-	{
-		if (str[count] == '-')
-			isnegativenum = -1;
-		count++;
-	}
-	while (str[count] >= '0' && str[count] <= '9')
-	{
-		strtonum = 10 * strtonum + (str[count] - '0');
-		count++;
-	}
-	if (isnegativenum == -1)
-		strtonum = strtonum * -1;
-	return (strtonum);
-}
-
-unsigned long	get_current_time(void)
-{
-	struct timeval	tv;
-	unsigned long	result;
-
-	gettimeofday(&tv, NULL);
-	result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-	return (result);
-}
-
-unsigned long	timer(unsigned long birth_time)
-{
-	struct timeval	tv;
-	unsigned long	result;
-
-	gettimeofday(&tv, NULL);
-	result = ((tv.tv_sec * 1000) + (tv.tv_usec / 1000)) - birth_time;
-	return (result);
-}
-
-void	printer(t_philo philo, char *str, char *emoji)
-{
-	printf("%-5lu Philosopher %-5d %-20s %s\n",
-		timer(philo.birth_time), philo.philo_id, str, emoji);
-}
-
-void	spend_time(unsigned long current_time, unsigned long time)
-{
-	while ((get_current_time() - current_time) < time)
-		usleep(100);
-}
-
-static int	dead_or_alive(t_philo *philo)
-{
-	unsigned long	current_time;
-
-	if (!philo->recent_meal)
-		current_time = timer(philo->birth_time);
-	else
-		current_time = get_current_time();
-	if (current_time >= philo->recent_meal + philo->die_time)
-		return (DEAD);
-	return (ALIVE);
-}
-
-void	*checker(void *arg)
-{
-	t_philo	*philo;
-
-	philo = (t_philo *)arg;
-	while ("The prophecy is true")
-	{
-		if (!philo->meal_size && philo->philo_id == philo->philo_size)
-		{
-			sem_wait(philo->pronounce_dead);
-			sem_post(philo->state);
-			return (NULL);
-		}
-		if (dead_or_alive(philo) == DEAD)
-		{
-			sem_wait(philo->pronounce_dead);
-			printer(*philo, "died", "⚰️");
-			sem_post(philo->state);
-			return (NULL);
-		}
-	}
-	return (NULL);
-}
-
-static void	init_philo(t_settings *settings)
-{
-	int		i;
-
-	i = 0;
-	while (i < settings->philo_size)
-	{
-		settings->philo[i].philo_id = i + 1;
-		settings->philo[i].philo_size = settings->philo_size;
-		settings->philo[i].state = settings->state;
-		settings->philo[i].recent_meal = 0;
-		settings->philo[i].sleep_time = settings->sleep_time;
-		settings->philo[i].die_time = settings->die_time;
-		settings->philo[i].eat_time = settings->eat_time;
-		settings->philo[i].birth_time = settings->start_time;
-		settings->philo[i].meal_size = settings->meal_size;
-		settings->philo[i].forks = settings->forks;
-		settings->philo[i].state = settings->state;
-		settings->philo[i].pronounce_dead = settings->pronounce_dead;
-		i++;
-	}
-}
-
-int	initialise(t_settings *settings, char **argv)
-{
-	settings->philo_size = ft_atoi(argv[PHILO_SIZE]);
-	if (settings->philo_size)
-	{
-		settings->start_time = get_current_time();
-		settings->die_time = ft_atoi(argv[DIE_TIME]);
-		settings->eat_time = ft_atoi(argv[EAT_TIME]);
-		settings->sleep_time = ft_atoi(argv[SLEEP_TIME]);
-		settings->meal_size = -1;
-		if (argv[MEAL_SIZE])
-			settings->meal_size = ft_atoi(argv[MEAL_SIZE]);
-		settings->checker = malloc(sizeof(pthread_t) * settings->philo_size);
-		settings->philo = malloc(sizeof(t_philo) * settings->philo_size);
-		sem_unlink("forks");
-		sem_unlink("state");
-		sem_unlink("pronounce dead");
-		settings->forks = sem_open("forks", O_CREAT, 0600, settings->philo_size);
-		settings->state = sem_open("state", O_CREAT, 0600, LOCKED);
-		settings->pronounce_dead = sem_open("pronounce dead", O_CREAT, 0600, 1);
-		init_philo(settings);
-		return (OK);
-	}
-	return (ERROR);
-}
-
-void	eat(t_philo *philo)
-{
-	sem_wait(philo->forks);
-	printer(*philo, "has taken a fork", "🍽️");
-	sem_wait(philo->forks);
-	printer(*philo, "has taken a fork", "🍽️");
-	philo->recent_meal = get_current_time();
-	printer(*philo, "is eating", "🍝");
-	if (philo->meal_size)
-		philo->meal_size--;
-	spend_time(get_current_time(), philo->eat_time);
-	sem_post(philo->forks);
-	sem_post(philo->forks);
-}
-
-void	go_to_bed(t_philo *philo, int sleep_time)
-{
-	printer(*philo, "is sleeping", "💤");
-	spend_time(get_current_time(), sleep_time);
-}
-
-void*	loop(t_philo *philo)
-{
-	while ("The prophecy is true")
-	{
-		eat(philo);
-		go_to_bed(philo, philo->sleep_time);
-		printer(*philo, "is thinking", "💭");
-	}
-	return (NULL);
-}
 
 void	kill_process(void *arg)
 {
@@ -241,12 +63,6 @@ void	start_children(t_settings *settings)
 		}
 		i++;
 	}
-}
-
-void free_everything(t_settings *settings)
-{
-	free(settings->checker);
-	free(settings->philo);
 }
 
 int	main(int argc, char **argv)

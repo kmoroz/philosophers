@@ -1,5 +1,8 @@
 PHILO_BONUS = philo_bonus
-SRC_BONUS = philo.c
+SRC_BONUS = philo.c utils.c \
+time.c initialiser.c \
+checker.c routine.c \
+freeing.c
 HEADER_BONUS = philo.h
 OBJ_BONUS = $(SRC_BONUS:.c=.o)
 

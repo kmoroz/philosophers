@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:41:31 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/28 13:34:24 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/04 14:33:38 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,5 +72,18 @@ typedef struct s_settings
 	sem_t			*state;
 	sem_t			*pronounce_dead;
 }				t_settings;
+
+void			printer(t_philo philo, char *str, char *emoji);
+int				ft_atoi(const char *str);
+unsigned long	timer(unsigned long birth_time);
+void			spend_time(unsigned long current_time, unsigned long time);
+unsigned long	timer(unsigned long birth_time);
+unsigned long	get_current_time(void);
+int				initialise(t_settings *settings, char **argv);
+void			*checker(void *arg);
+void			*loop(t_philo *philo);
+void			go_to_bed(t_philo *philo, int sleep_time);
+void			eat(t_philo *philo);
+void			free_everything(t_settings *settings);
 
 #endif
