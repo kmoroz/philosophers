@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/04 14:29:21 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/10 15:57:10 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,15 +73,17 @@ int	main(int argc, char **argv)
 	i = 0;
 	if (argc == 5 || argc == 6)
 	{
-		initialise(&settings, argv);
-		start_children(&settings);
-		while (i)
+		if (initialise(&settings, argv) == OK)
 		{
-			i--;
-			pthread_join(settings.checker[i], NULL);
+			start_children(&settings);
+			while (i)
+			{
+				i--;
+				pthread_join(settings.checker[i], NULL);
+			}
+			kill_process(&settings);
+			close_semaphore(&settings);
+			free_everything(&settings);
 		}
-		kill_process(&settings);
-		close_semaphore(&settings);
-		free_everything(&settings);
 	}
 }

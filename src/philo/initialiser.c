@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/04 17:21:01 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/03 09:31:44 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/10 15:00:17 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,19 +60,17 @@ static int	init_philo(t_settings *settings)
 int	initialise(t_settings *settings, char **argv)
 {
 	settings->philo_size = ft_atoi(argv[PHILO_SIZE]);
-	if (settings->philo_size)
-	{
-		settings->start_time = get_current_time();
-		settings->die_time = ft_atoi(argv[DIE_TIME]);
-		settings->eat_time = ft_atoi(argv[EAT_TIME]);
-		settings->sleep_time = ft_atoi(argv[SLEEP_TIME]);
-		settings->meal_size = -1;
-		if (argv[MEAL_SIZE])
-			settings->meal_size = ft_atoi(argv[MEAL_SIZE]);
-		settings->philo = malloc(sizeof(t_philo) * settings->philo_size);
-		if (!settings->philo || init_philo(settings) == ERROR)
-			return (ERROR);
-		return (OK);
-	}
-	return (ERROR);
+	if (!settings->philo_size)
+		return (ERROR);
+	settings->start_time = get_current_time();
+	settings->die_time = ft_atoi(argv[DIE_TIME]);
+	settings->eat_time = ft_atoi(argv[EAT_TIME]);
+	settings->sleep_time = ft_atoi(argv[SLEEP_TIME]);
+	settings->meal_size = -1;
+	if (argv[MEAL_SIZE])
+		settings->meal_size = ft_atoi(argv[MEAL_SIZE]);
+	settings->philo = malloc(sizeof(t_philo) * settings->philo_size);
+	if (!settings->philo || init_philo(settings) == ERROR)
+		return (ERROR);
+	return (OK);
 }
