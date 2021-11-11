@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/04 17:38:09 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/11 09:13:56 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/11 14:29:25 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,9 @@ static int	dead_or_alive(t_philo *philo)
 		current_time = get_current_time();
 	if (current_time >= philo->recent_meal + philo->die_time)
 	{
+		pthread_mutex_lock(philo->pronounce_dead);
 		philo->state = DEAD;
+		pthread_mutex_unlock(philo->pronounce_dead);
 		return (DEAD);
 	}
 	return (ALIVE);
@@ -36,7 +38,9 @@ static void	mark_everyone_dead(t_settings *settings)
 	i = 0;
 	while (i < settings->philo_size)
 	{
+		pthread_mutex_lock(settings->philo[i].pronounce_dead);
 		settings->philo[i].state = DEAD;
+		pthread_mutex_unlock(settings->philo[i].pronounce_dead);
 		i++;
 	}
 }

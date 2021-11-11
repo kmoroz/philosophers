@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/04 17:21:01 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/11 09:13:42 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/11 14:18:43 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ static int	init_philo(t_settings *settings)
 		settings->philo[i].eat_time = settings->eat_time;
 		settings->philo[i].birth_time = settings->start_time;
 		settings->philo[i].meal_size = settings->meal_size;
+		settings->philo[i].pronounce_dead = &settings->pronounce_dead;
 		i++;
 	}
 	return (OK);
@@ -68,6 +69,8 @@ int	initialise(t_settings *settings, char **argv)
 	if (argv[MEAL_SIZE])
 		settings->meal_size = ft_atoi(argv[MEAL_SIZE]);
 	if (check_input(settings, argv) == ERROR)
+		return (ERROR);
+	if (pthread_mutex_init(&settings->pronounce_dead, NULL) != 0)
 		return (ERROR);
 	settings->philo = malloc(sizeof(t_philo) * settings->philo_size);
 	if (!settings->philo || init_philo(settings) == ERROR)

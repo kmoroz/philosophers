@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 15:16:39 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/11 09:13:28 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/11 14:31:39 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,7 @@ typedef struct s_philo
 	int				meal_size;
 	pthread_t		thread;
 	t_table			*table;
+	pthread_mutex_t	*pronounce_dead;
 }				t_philo;
 
 typedef struct s_settings
@@ -78,6 +79,7 @@ typedef struct s_settings
 	unsigned long	start_time;
 	pthread_t		checker;
 	t_philo			*philo;
+	pthread_mutex_t	pronounce_dead;
 }				t_settings;
 
 int				initialise(t_settings *settings, char **argv);
