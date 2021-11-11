@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 14:23:20 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/20 16:17:33 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/11 09:12:25 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,4 +75,6 @@ int	main(int argc, char **argv)
 			free_everything(&settings);
 		}
 	}
+	else
+		print_user_prompt(NOT_ENOUGH_ARGS);
 }
