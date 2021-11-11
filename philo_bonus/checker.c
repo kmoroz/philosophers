@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/04 14:21:09 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/04 14:22:54 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/11 10:48:56 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,4 +48,20 @@ void	*checker(void *arg)
 		}
 	}
 	return (NULL);
+}
+
+int	check_input(t_settings *settings, char **argv)
+{
+	if (settings->philo_size <= 0 || settings->die_time <= 0
+		|| settings->eat_time <= 0 || settings->sleep_time <= 0)
+	{
+		print_user_prompt(NEG_ZERO_INPUT);
+		return (ERROR);
+	}
+	if (argv[MEAL_SIZE] && settings->meal_size <= 0)
+	{
+		print_user_prompt(NEG_ZERO_INPUT);
+		return (ERROR);
+	}
+	return (OK);
 }
