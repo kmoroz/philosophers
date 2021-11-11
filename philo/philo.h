@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 15:16:39 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/20 16:19:30 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/11 09:13:28 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,13 @@
 # define DEAD 6
 # define ALIVE 7
 
+/*
+** User prompt codes
+*/
+
+# define NOT_ENOUGH_ARGS 1
+# define NEG_ZERO_INPUT 2
+
 # include <pthread.h>
 
 typedef struct s_table
@@ -52,9 +59,9 @@ typedef struct s_philo
 	int				left_fork;
 	int				right_fork;
 	unsigned long	birth_time;
-	unsigned long	sleep_time;
-	unsigned long	eat_time;
-	unsigned long	die_time;
+	long			sleep_time;
+	long			eat_time;
+	long			die_time;
 	unsigned long	recent_meal;
 	int				meal_size;
 	pthread_t		thread;
@@ -64,9 +71,9 @@ typedef struct s_philo
 typedef struct s_settings
 {
 	int				philo_size;
-	unsigned long	die_time;
-	unsigned long	eat_time;
-	unsigned long	sleep_time;
+	long			die_time;
+	long			eat_time;
+	long			sleep_time;
 	int				meal_size;
 	unsigned long	start_time;
 	pthread_t		checker;
@@ -83,5 +90,7 @@ void			*checker(void *arg);
 void			free_everything(t_settings *settings);
 void			eat(t_philo *philo, t_table *table);
 void			go_to_bed(t_philo *philo, int sleep_time);
+void			print_user_prompt(int code);
+int				check_input(t_settings *settings, char **argv);
 
 #endif
