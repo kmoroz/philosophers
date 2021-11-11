@@ -26,3 +26,5 @@ fclean: clean
 	@echo "\n\033[36m executables removed 👋\033[0m\n"
 
 re: fclean all
+
+.PHONY: all clean fclean re
