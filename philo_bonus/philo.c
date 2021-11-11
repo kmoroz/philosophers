@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/10 15:57:10 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/11 10:45:38 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,14 +76,16 @@ int	main(int argc, char **argv)
 		if (initialise(&settings, argv) == OK)
 		{
 			start_children(&settings);
-			while (i)
+			while (i < settings.philo_size)
 			{
-				i--;
 				pthread_join(settings.checker[i], NULL);
+				i++;
 			}
 			kill_process(&settings);
 			close_semaphore(&settings);
 			free_everything(&settings);
 		}
 	}
+	else
+		print_user_prompt(NOT_ENOUGH_ARGS);
 }
