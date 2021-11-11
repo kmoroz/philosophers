@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:41:31 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/04 14:33:38 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/11 10:46:09 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,13 @@
 
 # define DEAD 6
 # define ALIVE 7
+
+/*
+** User prompt codes
+*/
+
+# define NOT_ENOUGH_ARGS 1
+# define NEG_ZERO_INPUT 2
 
 # include <semaphore.h>
 # include <pthread.h>
@@ -85,5 +92,7 @@ void			*loop(t_philo *philo);
 void			go_to_bed(t_philo *philo, int sleep_time);
 void			eat(t_philo *philo);
 void			free_everything(t_settings *settings);
+void			print_user_prompt(int code);
+int				check_input(t_settings *settings, char **argv);
 
 #endif
