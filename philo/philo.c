@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 14:23:20 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/11 14:23:18 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/13 12:01:49 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,6 @@ void	create_threads(t_settings *settings)
 		philo = &settings->philo[i];
 		thread = &settings->philo[i].thread;
 		pthread_create(thread, NULL, loop, philo);
-		spend_time(get_current_time(), 2);
 		i++;
 	}
 	pthread_create(checker_thread, NULL, checker, settings);

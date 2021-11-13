@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/11 10:45:38 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/13 12:04:35 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,8 +53,6 @@ void	start_children(t_settings *settings)
 	while (i < settings->philo_size)
 	{
 		settings->philo[i].pid = fork();
-		if (i > 0)
-			spend_time(get_current_time(), 5);
 		if (settings->philo[i].pid == 0)
 		{
 			pthread_create(&settings->checker[i], NULL,
