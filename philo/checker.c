@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/04 17:38:09 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/11 14:29:25 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/13 17:40:09 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,16 @@
 static int	dead_or_alive(t_philo *philo)
 {
 	unsigned long	current_time;
+	unsigned long	die_time;
 
+	pthread_mutex_lock(philo->meal_time);
 	if (!philo->recent_meal)
 		current_time = timer(philo->birth_time);
 	else
 		current_time = get_current_time();
-	if (current_time >= philo->recent_meal + philo->die_time)
+	die_time = philo->recent_meal + philo->die_time;
+	pthread_mutex_unlock(philo->meal_time);
+	if (current_time >= die_time)
 	{
 		pthread_mutex_lock(philo->pronounce_dead);
 		philo->state = DEAD;
@@ -56,8 +60,13 @@ void	*checker(void *arg)
 	{
 		if (settings->philo_size == i)
 			i = 0;
+		pthread_mutex_lock(settings->philo[i].meal_count);
 		if (!settings->philo[i].meal_size)
+		{
+			pthread_mutex_unlock(settings->philo[i].meal_count);
 			return (NULL);
+		}
+		pthread_mutex_unlock(settings->philo[i].meal_count);
 		if (dead_or_alive(&settings->philo[i]) == DEAD)
 		{
 			mark_everyone_dead(settings);

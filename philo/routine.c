@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/20 16:17:53 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/10/20 16:18:34 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/13 17:07:16 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,13 +42,14 @@ void	eat(t_philo *philo, t_table *table)
 		pthread_mutex_unlock(&table->fork[philo->right_fork]);
 	else
 	{
+		pthread_mutex_lock(philo->meal_time);
 		philo->recent_meal = get_current_time();
-		if (philo->state == ALIVE)
-		{
-			printer(*philo, "is eating", "🍝");
-			philo->meal_size--;
-			spend_time(get_current_time(), philo->eat_time);
-		}
+		pthread_mutex_unlock(philo->meal_time);
+		printer(*philo, "is eating", "🍝");
+		pthread_mutex_lock(philo->meal_count);
+		philo->meal_size--;
+		pthread_mutex_unlock(philo->meal_count);
+		spend_time(get_current_time(), philo->eat_time);
 		pthread_mutex_unlock(&table->fork[philo->left_fork]);
 		pthread_mutex_unlock(&table->fork[philo->right_fork]);
 	}
