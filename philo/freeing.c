@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/06 15:25:16 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/11 16:19:45 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/13 17:48:43 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,5 +31,7 @@ void	free_everything(t_settings *settings)
 	free_fork(settings->philo_size, settings->philo->table->fork);
 	free(settings->philo->table);
 	pthread_mutex_destroy(&settings->pronounce_dead);
+	pthread_mutex_destroy(&settings->meal_count);
+	pthread_mutex_destroy(&settings->meal_time);
 	free(settings->philo);
 }
