@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 14:23:20 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/13 12:01:49 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/22 13:48:39 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,10 +55,13 @@ void	create_threads(t_settings *settings)
 	{
 		philo = &settings->philo[i];
 		thread = &settings->philo[i].thread;
-		pthread_create(thread, NULL, loop, philo);
+		if (pthread_create(thread, NULL, loop, philo))
+			return ;
+		spend_time(get_current_time(), 1);
 		i++;
 	}
-	pthread_create(checker_thread, NULL, checker, settings);
+	if (pthread_create(checker_thread, NULL, checker, settings))
+		return ;
 }
 
 int	main(int argc, char **argv)
@@ -74,10 +77,12 @@ int	main(int argc, char **argv)
 			create_threads(&settings);
 			while (i < settings.philo_size)
 			{
-				pthread_join(settings.philo[i].thread, NULL);
+				if (pthread_join(settings.philo[i].thread, NULL))
+					return (ERROR);
 				i++;
 			}
-			pthread_join(settings.checker, NULL);
+			if (pthread_join(settings.checker, NULL))
+				return (ERROR);
 			free_everything(&settings);
 		}
 	}
