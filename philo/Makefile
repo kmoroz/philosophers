@@ -6,7 +6,7 @@ routine.c
 HEADER = philo.h
 OBJ = $(SRC:.c=.o)
 
-FLAGS = -g -pthread -Wall -Werror -Wextra
+FLAGS = -g -Wall -Werror -Wextra
 
 all: $(NAME)
 
