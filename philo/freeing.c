@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/06 15:25:16 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/13 17:48:43 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/23 13:00:37 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@ void	free_fork(int size, pthread_mutex_t *fork)
 	i = 0;
 	while (i < size)
 	{
-		pthread_mutex_destroy(&fork[i]);
+		if (pthread_mutex_destroy(&fork[i]))
+			break ;
 		i++;
 	}
 	free(fork);

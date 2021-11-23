@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 15:16:39 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/13 17:33:58 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/23 09:41:49 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,7 @@ int				ft_atoi(const char *str);
 void			printer(t_philo philo, char *str, char *emoji);
 void			*checker(void *arg);
 void			free_everything(t_settings *settings);
-void			eat(t_philo *philo, t_table *table);
+int				eat(t_philo *philo, t_table *table);
 void			go_to_bed(t_philo *philo, int sleep_time);
 void			print_user_prompt(int code);
 int				check_input(t_settings *settings, char **argv);

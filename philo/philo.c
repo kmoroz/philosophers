@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/09/21 14:23:20 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/22 13:48:39 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/23 11:34:32 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,14 +26,18 @@ void	*loop(void *arg)
 	table = philo->table;
 	while ("The prophecy is true")
 	{
-		pthread_mutex_lock(philo->pronounce_dead);
+		if (pthread_mutex_lock(philo->pronounce_dead))
+			break ;
 		if (philo->state == DEAD)
 		{
-			pthread_mutex_unlock(philo->pronounce_dead);
+			if (pthread_mutex_unlock(philo->pronounce_dead))
+				break ;
 			break ;
 		}
-		pthread_mutex_unlock(philo->pronounce_dead);
-		eat(philo, table);
+		if (pthread_mutex_unlock(philo->pronounce_dead))
+			break ;
+		if (eat(philo, table) == ERROR)
+			break ;
 		if (!philo->meal_size || philo->right_fork == philo->left_fork)
 			return (NULL);
 		go_to_bed(philo, philo->sleep_time);

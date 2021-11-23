@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/04 17:38:09 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/13 17:40:09 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/23 11:59:39 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,35 +18,57 @@ static int	dead_or_alive(t_philo *philo)
 	unsigned long	current_time;
 	unsigned long	die_time;
 
-	pthread_mutex_lock(philo->meal_time);
+	if (pthread_mutex_lock(philo->meal_time))
+		return (ERROR);
 	if (!philo->recent_meal)
 		current_time = timer(philo->birth_time);
 	else
 		current_time = get_current_time();
 	die_time = philo->recent_meal + philo->die_time;
-	pthread_mutex_unlock(philo->meal_time);
+	if (pthread_mutex_unlock(philo->meal_time))
+		return (ERROR);
 	if (current_time >= die_time)
 	{
-		pthread_mutex_lock(philo->pronounce_dead);
+		if (pthread_mutex_lock(philo->pronounce_dead))
+			return (ERROR);
 		philo->state = DEAD;
-		pthread_mutex_unlock(philo->pronounce_dead);
+		if (pthread_mutex_unlock(philo->pronounce_dead))
+			return (ERROR);
 		return (DEAD);
 	}
 	return (ALIVE);
 }
 
-static void	mark_everyone_dead(t_settings *settings)
+static int	mark_everyone_dead(t_settings *settings)
 {
 	int	i;
 
 	i = 0;
 	while (i < settings->philo_size)
 	{
-		pthread_mutex_lock(settings->philo[i].pronounce_dead);
+		if (pthread_mutex_lock(settings->philo[i].pronounce_dead))
+			return (ERROR);
 		settings->philo[i].state = DEAD;
-		pthread_mutex_unlock(settings->philo[i].pronounce_dead);
+		if (pthread_mutex_unlock(settings->philo[i].pronounce_dead))
+			return (ERROR);
 		i++;
 	}
+	return (OK);
+}
+
+static int	check_meals(t_settings *settings, int i)
+{
+	if (pthread_mutex_lock(settings->philo[i].meal_count))
+		return (0);
+	if (!settings->philo[i].meal_size)
+	{
+		if (pthread_mutex_unlock(settings->philo[i].meal_count))
+			return (0);
+		return (0);
+	}
+	if (pthread_mutex_unlock(settings->philo[i].meal_count))
+		return (0);
+	return (OK);
 }
 
 void	*checker(void *arg)
@@ -60,19 +82,17 @@ void	*checker(void *arg)
 	{
 		if (settings->philo_size == i)
 			i = 0;
-		pthread_mutex_lock(settings->philo[i].meal_count);
-		if (!settings->philo[i].meal_size)
-		{
-			pthread_mutex_unlock(settings->philo[i].meal_count);
+		if (!check_meals(settings, i))
 			return (NULL);
-		}
-		pthread_mutex_unlock(settings->philo[i].meal_count);
 		if (dead_or_alive(&settings->philo[i]) == DEAD)
 		{
-			mark_everyone_dead(settings);
+			if (mark_everyone_dead(settings) == ERROR)
+				return (NULL);
 			printer(settings->philo[i], "died", "⚰️");
 			return (NULL);
 		}
+		if (dead_or_alive(&settings->philo[i]) == ERROR)
+			return (NULL);
 		i++;
 	}
 }
