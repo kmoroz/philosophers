@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/13 12:04:35 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/23 09:24:56 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,10 +53,13 @@ void	start_children(t_settings *settings)
 	while (i < settings->philo_size)
 	{
 		settings->philo[i].pid = fork();
+		if (i > 0)
+			spend_time(get_current_time(), 3);
 		if (settings->philo[i].pid == 0)
 		{
-			pthread_create(&settings->checker[i], NULL,
-				checker, &settings->philo[i]);
+			if (pthread_create(&settings->checker[i], NULL,
+					checker, &settings->philo[i]))
+				exit(1);
 			loop(&settings->philo[i]);
 		}
 		i++;
@@ -76,7 +79,8 @@ int	main(int argc, char **argv)
 			start_children(&settings);
 			while (i < settings.philo_size)
 			{
-				pthread_join(settings.checker[i], NULL);
+				if (pthread_join(settings.checker[i], NULL))
+					break ;
 				i++;
 			}
 			kill_process(&settings);
