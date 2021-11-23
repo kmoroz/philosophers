@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:41:31 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/11 14:38:31 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/23 13:10:06 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ typedef struct s_philo
 	sem_t			*forks;
 	sem_t			*state;
 	sem_t			*pronounce_dead;
+	sem_t			*meal_time;
 }				t_philo;
 
 typedef struct s_settings
@@ -78,6 +79,7 @@ typedef struct s_settings
 	sem_t			*forks;
 	sem_t			*state;
 	sem_t			*pronounce_dead;
+	sem_t			*meal_time;
 }				t_settings;
 
 void			printer(t_philo philo, char *str, char *emoji);

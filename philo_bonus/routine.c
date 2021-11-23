@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/04 14:25:00 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/04 14:34:03 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/23 13:11:02 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,9 @@ void	eat(t_philo *philo)
 	printer(*philo, "has taken a fork", "🍽️");
 	sem_wait(philo->forks);
 	printer(*philo, "has taken a fork", "🍽️");
+	sem_wait(philo->meal_time);
 	philo->recent_meal = get_current_time();
+	sem_post(philo->meal_time);
 	printer(*philo, "is eating", "🍝");
 	if (philo->meal_size)
 		philo->meal_size--;

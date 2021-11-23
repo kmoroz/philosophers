@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/11/04 14:17:25 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/11 10:48:15 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/23 13:10:18 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ static void	init_philo(t_settings *settings)
 		settings->philo[i].forks = settings->forks;
 		settings->philo[i].state = settings->state;
 		settings->philo[i].pronounce_dead = settings->pronounce_dead;
+		settings->philo[i].meal_time = settings->meal_time;
 		i++;
 	}
 }
@@ -59,6 +60,7 @@ int	initialise(t_settings *settings, char **argv)
 			0600, settings->philo_size);
 	settings->state = sem_open("state", O_CREAT, 0600, LOCKED);
 	settings->pronounce_dead = sem_open("pronounce dead", O_CREAT, 0600, 1);
+	settings->meal_time = sem_open("meal time", O_CREAT, 0600, 1);
 	init_philo(settings);
 	return (OK);
 }

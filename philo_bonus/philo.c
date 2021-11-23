@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/14 17:29:10 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/23 09:24:56 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/23 13:14:09 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,11 @@ void	close_semaphore(t_settings *settings)
 	sem_close(settings->forks);
 	sem_close(settings->state);
 	sem_close(settings->pronounce_dead);
+	sem_close(settings->meal_time);
 	sem_unlink("forks");
 	sem_unlink("state");
 	sem_unlink("pronounce dead");
+	sem_unlink("meal time");
 }
 
 void	start_children(t_settings *settings)

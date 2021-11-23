@@ -6,7 +6,7 @@ freeing.c
 HEADER_BONUS = philo.h
 OBJ_BONUS = $(SRC_BONUS:.c=.o)
 
-FLAGS = -g -pthread -Wall -Werror -Wextra
+FLAGS = -g -Wall -Werror -Wextra
 
 all: $(NAME)
 
