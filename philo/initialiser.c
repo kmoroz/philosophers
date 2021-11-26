@@ -6,7 +6,7 @@
 /*   By: ksmorozo <ksmorozo@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/10/04 17:21:01 by ksmorozo      #+#    #+#                 */
-/*   Updated: 2021/11/13 17:33:11 by ksmorozo      ########   odam.nl         */
+/*   Updated: 2021/11/26 17:44:26 by ksmorozo      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ static int	init_philo(t_settings *settings)
 
 	i = 0;
 	table = malloc(sizeof(t_table));
-	if (init_forks(settings, table) == ERROR || !table)
+	if (!table || init_forks(settings, table) == ERROR)
 		return (ERROR);
 	while (i < settings->philo_size)
 	{
